@@ -1,16 +1,22 @@
 <?php
-// Permitir acceso desde cualquier origen (o específicamente desde tu puerto de React)
+// Permisos CORS (vital para que React no se queje)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-// Simulamos datos de una base de datos
-$usuarios = [
-    ["id" => 1, "nombre" => "Ana", "rol" => "Admin"],
-    ["id" => 2, "nombre" => "Carlos", "rol" => "Usuario"],
-    ["id" => 3, "nombre" => "Tu", "rol" => "Dev"]
-];
+// Incluimos la conexión que acabamos de crear
+include_once 'db.php';
 
-// Devolvemos los datos en formato JSON
-echo json_encode($usuarios);
-?>
+try {
+    // Preparamos la consulta SQL
+    $stmt = $pdo->query("SELECT * FROM usuarios");
+
+    // Obtenemos los datos en un array asociativo
+    $usuarios = $stmt->fetchAll();
+
+    // Lo enviamos como JSON a React
+    echo json_encode($usuarios);
+} catch (PDOException $e) {
+    // En caso de error, devolvemos un JSON con el error
+    echo json_encode(["error" => $e->getMessage()]);
+}
