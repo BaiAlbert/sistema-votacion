@@ -1,14 +1,26 @@
 import React from 'react';
 import './App.css';
-import { Header } from './Header.jsx';
-import { Body } from './Body.jsx';
+import { Header } from './components/Header.jsx';
+import { Body } from './pages/Body.jsx';
+import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
 
 function App() {
 	return (
-		<React.Fragment>
-			<Header titulo="Sistema de Votación"></Header>
-			<Body />
-		</React.Fragment>
+		<Routes>
+			<Route
+				path="/"
+				element={
+					<>
+						<Header titulo="Sistema de Votación"></Header>
+						<Body />
+					</>
+				}
+			/>
+			<Route path="/login" element={<Login />} />
+			<Route path="/register" element={<Register />} />
+		</Routes>
 	);
 }
 
