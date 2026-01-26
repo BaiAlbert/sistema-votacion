@@ -1,7 +1,7 @@
--- Active: 1769213655415@@127.0.0.1@3306@app_votaciones
+-- Active: 1769464431406@@127.0.0.1@3306@app_votaciones
 
 create table usuarios (
-    id int auto increment primary key,
+    id int auto_increment primary key,
     username varchar(50) not null unique,
     password varchar(255) not null,
     nombre varchar(50) not null,
@@ -14,7 +14,7 @@ create table usuarios (
 ) engine=InnoDB;
 
 create table votaciones (
-    id int auto increment primary key,
+    id int auto_increment primary key,
     id_autor int not null,
     titulo varchar(100) not null,
     descripcion text,
@@ -28,7 +28,7 @@ create table votaciones (
 ) engine=InnoDB;
 
 create table opciones (
-    id int auto increment primary key,
+    id int auto_increment primary key,
     id_votacion int not null,
     nombre_opcion varchar(50) not null,
     desc_opcion text,
@@ -37,7 +37,7 @@ create table opciones (
 ) engine=InnoDB;
 
 create table votos (
-    id int auto increment primary key,
+    id int auto_increment primary key,
     id_votacion int not null,
     id_votante int not null,
     id_opcion int not null,
