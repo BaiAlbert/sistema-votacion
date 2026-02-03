@@ -43,8 +43,7 @@ function Login() {
 		}
 	};
 
-	// Estilos "Glassmorphism" reutilizados para mantener consistencia visual
-	const cardStyle = {
+	const estiloLoginCard = {
 		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 		backdropFilter: 'blur(10px)',
 		padding: '2rem',
@@ -57,7 +56,7 @@ function Login() {
 		margin: '150px auto', // Margen superior para no chocar con el header
 	};
 
-	const inputStyle = {
+	const estiloLoginInput = {
 		display: 'block',
 		width: '100%',
 		padding: '0.8rem',
@@ -69,7 +68,7 @@ function Login() {
 		boxSizing: 'border-box',
 	};
 
-	const buttonStyle = {
+	const estiloLoginBoton = {
 		width: '100%',
 		padding: '0.8rem',
 		backgroundColor: '#007bff',
@@ -82,9 +81,11 @@ function Login() {
 
 	return (
 		<div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-			<div style={cardStyle}>
+			<div style={estiloLoginCard}>
 				<h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Iniciar Sesión</h2>
+				
 				{error && <p style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
+
 				<form onSubmit={handleSubmit}>
 					<input
 						type="email"
@@ -92,20 +93,23 @@ function Login() {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 						required
-						style={inputStyle}
+						style={estiloLoginInput}
 					/>
+
 					<input
 						type="password"
 						placeholder="Contraseña"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						required
-						style={inputStyle}
+						style={estiloLoginInput}
 					/>
-					<button type="submit" style={buttonStyle}>
+
+					<button type="submit" style={estiloLoginBoton}>
 						Entrar
 					</button>
 				</form>
+				
 				<p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
 					¿No tienes cuenta?{' '}
 					<span

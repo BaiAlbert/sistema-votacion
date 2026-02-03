@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { Input } from '../components/Input';
 
 /**
  * Componente de Página de Registro
@@ -68,18 +69,6 @@ function Register() {
 		margin: '100px auto',
 	};
 
-	const inputStyle = {
-		display: 'block',
-		width: '100%',
-		padding: '0.8rem',
-		marginBottom: '0.8rem',
-		borderRadius: '8px',
-		border: '1px solid rgba(255, 255, 255, 0.3)',
-		backgroundColor: 'rgba(0, 0, 0, 0.2)',
-		color: 'white',
-		boxSizing: 'border-box',
-	};
-
 	const buttonStyle = {
 		width: '100%',
 		padding: '0.8rem',
@@ -99,50 +88,26 @@ function Register() {
 				{error && <p style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
 				{/* Usamos CSS grid para organizar los inputs en dos columnas */}
 				<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-					<input name="username" placeholder="Usuario" onChange={handleChange} required style={inputStyle} />
-					<input
-						name="password"
-						type="password"
-						placeholder="Contraseña"
-						onChange={handleChange}
-						required
-						style={inputStyle}
-					/>
-
-					<input name="nombre" placeholder="Nombre" onChange={handleChange} required style={inputStyle} />
-					<input
-						name="apellidos"
-						placeholder="Apellidos"
-						onChange={handleChange}
-						required
-						style={inputStyle}
-					/>
-
-					<input
+					<Input name="username" placeholder="Usuario" onChange={handleChange}></Input>
+					<Input name="password" type="password" placeholder="Contraseña" onChange={handleChange}></Input>
+					<Input name="nombre" type="text" placeholder="Nombre" onChange={handleChange}></Input>
+					<Input name="apellidos" type="text" placeholder="Apellidos" onChange={handleChange}></Input>
+					<Input
 						name="email"
 						type="email"
-						placeholder="Email"
+						placeholder="Correo electronico"
 						onChange={handleChange}
-						required
-						style={{ ...inputStyle, gridColumn: 'span 2' }}
-					/>
-
-					<input name="telefono" placeholder="Teléfono" onChange={handleChange} style={inputStyle} />
-					<input
-						name="provincia"
-						placeholder="Provincia"
-						onChange={handleChange}
-						required
-						style={inputStyle}
-					/>
-
-					<input
+						estiloExtra={{ gridColumn: 'span 2' }}
+					></Input>
+					<Input name="telefono" type="tel" placeholder="Telefono" onChange={handleChange}></Input>
+					<Input name="provincia" type="text" placeholder="Provincia" onChange={handleChange}></Input>
+					<Input
 						name="ciudad"
+						type="text"
 						placeholder="Ciudad"
 						onChange={handleChange}
-						required
-						style={{ ...inputStyle, gridColumn: 'span 2' }}
-					/>
+						estiloExtra={{ gridColumn: 'span 2' }}
+					></Input>
 
 					<button type="submit" style={{ ...buttonStyle, gridColumn: 'span 2' }}>
 						Registrarse

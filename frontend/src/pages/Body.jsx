@@ -1,18 +1,18 @@
 export function Body() {
+	const estiloMainBody = {
+		paddingTop: '120px',
+		paddingBottom: '50px',
+		width: '100%',
+		maxWidth: '1200px',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: '.5rem',
+		paddingRight: '2rem',
+		paddingLeft: '2rem',
+	};
+
 	return (
-		<main
-			style={{
-				paddingTop: '120px',
-				paddingBottom: '50px',
-				width: '100%',
-				maxWidth: '1200px',
-				display: 'flex',
-				flexDirection: 'column',
-				gap: '.5rem',
-				paddingRight: '2rem',
-				paddingLeft: '2rem',
-			}}
-		>
+		<main style={estiloMainBody}>
 			<Section titulo="Votaciones asignadas a mí" />
 			<Section titulo="Votaciones creadas por mí" />
 			<Section titulo="Elecciones en las que soy elegible" />
@@ -21,30 +21,28 @@ export function Body() {
 }
 
 function Section({ titulo }) {
+	const estiloBodySectionH2 = {
+		color: 'white',
+		marginBottom: '1rem',
+		fontSize: '2rem',
+		textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+		textAlign: 'left',
+		marginLeft: 0,
+		paddingLeft: 0,
+	};
+
+	const estiloBodySectionDiv = {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+		gap: '2rem',
+		width: '100%',
+	};
+
 	return (
 		<section style={{ width: '100%' }}>
-			<h2
-				style={{
-					color: 'white',
-					marginBottom: '1rem',
-					fontSize: '2rem',
-					textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-					textAlign: 'left',
-					marginLeft: 0,
-					paddingLeft: 0,
-				}}
-			>
-				{titulo}
-			</h2>
+			<h2 style={estiloBodySectionH2}>{titulo}</h2>
 
-			<div
-				style={{
-					display: 'grid',
-					gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-					gap: '2rem',
-					width: '100%',
-				}}
-			>
+			<div style={estiloBodySectionDiv}>
 				<Card titulo="Tarjeta 1" />
 				<Card titulo="Tarjeta 2" />
 				<Card titulo="Tarjeta 3" />
@@ -54,11 +52,11 @@ function Section({ titulo }) {
 }
 
 function Card({ titulo }) {
-	const estiloCard = {
+	const estiloBodyCard = {
 		flex: '1',
 		minWidth: '250px',
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-		backdropFilter: 'blur(10px)',
+		backgroundColor: 'rgba(80, 80, 80, 0.5)',
+		// backdropFilter: 'blur(10px)',
 		padding: '2rem',
 		borderRadius: '16px',
 		border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -68,27 +66,27 @@ function Card({ titulo }) {
 		cursor: 'pointer',
 	};
 
+	const estiloBodyCardButton = {
+		marginTop: '1rem',
+		padding: '0.5rem 1rem',
+		backgroundColor: 'rgba(255, 255, 255, 0.2)',
+		border: 'none',
+		borderRadius: '4px',
+		color: 'white',
+		cursor: 'pointer',
+		width: '100%',
+	};
+
 	return (
-		<div style={estiloCard}>
+		<div style={estiloBodyCard}>
 			<h3 style={{ marginTop: 0 }}>{titulo}</h3>
+
 			<p style={{ opacity: 0.8 }}>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
-				dolore magna aliqua.
+				Este texto esta aquí como ejemplo. Este texto esta aquí como ejemplo. Este texto esta aquí como ejemplo.
+				Este texto esta aquí como ejemplo.
 			</p>
-			<button
-				style={{
-					marginTop: '1rem',
-					padding: '0.5rem 1rem',
-					backgroundColor: 'rgba(255, 255, 255, 0.2)',
-					border: 'none',
-					borderRadius: '4px',
-					color: 'white',
-					cursor: 'pointer',
-					width: '100%',
-				}}
-			>
-				Ver más
-			</button>
+
+			<button style={estiloBodyCardButton}>Ver más</button>
 		</div>
 	);
 }

@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext } from 'react';
 
 // Creamos el contexto que almacenará el estado global de autenticación
 const AuthContext = createContext(null);
@@ -12,15 +12,16 @@ const AuthContext = createContext(null);
  * la sesión activa al recargar la página.
  */
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
-
-	// Al cargar la app, comprobamos si hay un usuario guardado en localStorage
-	useEffect(() => {
+	/**
+	 * Ejecutamos una funcion en el useState ya que esto se ejecuta 
+	 * una sola vez antes de pintar nada en pantalla, obtenemos el user 
+	 * del localStorage, si hay user en el localStorage le pasamos los datos
+	 * del usuario, y si no, iniciamos el estado en null.
+	 */
+	const [user, setUser] = useState(() => {
 		const storedUser = localStorage.getItem('user');
-		if (storedUser) {
-			setUser(JSON.parse(storedUser));
-		}
-	}, []);
+		return storedUser ? JSON.parse(storedUser) : null;
+	});
 
 	/**
 	 * Función para iniciar sesión.
@@ -47,4 +48,5 @@ export const AuthProvider = ({ children }) => {
  * Hook personalizado para usar el contexto de autenticación fácilmente.
  * Permite acceder a { user, login, logout } desde cualquier componente.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
