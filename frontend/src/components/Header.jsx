@@ -67,23 +67,26 @@ export function Header({ titulo }) {
 			</h1>
 
 			<nav style={estiloNav}>
-				<button style={estiloBotonSecundario}>Ayuda</button>
 				{/* Renderizado condicional: Si hay usuario, mostramos "Cerrar Sesión", si no "Iniciar Sesión" */}
 				{user ? (
-					<button
-						style={estiloBoton}
-						onClick={() => {
-							logout(); // Limpia el estado global
-							navigate('/login'); // Redirige al login
-						}}
-					>
-						Cerrar Sesión
-					</button>
+					<>
+						<p>Bienvenido, {user.username}</p>
+						<button
+							style={estiloBoton}
+							onClick={() => {
+								logout(); // Limpia el estado global
+								navigate('/login'); // Redirige al login
+							}}
+						>
+							Cerrar Sesión
+						</button>
+					</>
 				) : (
 					<button style={estiloBoton} onClick={() => navigate('/login')}>
 						Iniciar Sesión
 					</button>
 				)}
+				<button style={estiloBotonSecundario}>Ayuda</button>
 			</nav>
 		</header>
 	);

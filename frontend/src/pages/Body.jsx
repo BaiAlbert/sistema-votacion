@@ -9,6 +9,7 @@ export function Body() {
 		gap: '.5rem',
 		paddingRight: '2rem',
 		paddingLeft: '2rem',
+		cursor: 'default',
 	};
 
 	return (
@@ -63,7 +64,6 @@ function Card({ titulo }) {
 		boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 		color: 'white',
 		transition: 'transform 0.2s ease',
-		cursor: 'pointer',
 	};
 
 	const estiloBodyCardButton = {
