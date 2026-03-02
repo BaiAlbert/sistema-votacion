@@ -14,9 +14,9 @@ export function Body() {
 
 	return (
 		<main style={estiloMainBody}>
-			<Section titulo="Votaciones asignadas a mí" />
-			<Section titulo="Votaciones creadas por mí" />
-			<Section titulo="Elecciones en las que soy elegible" />
+			<Section titulo="Votaciones en Curso (Pendientes de tu voto)" />
+			<Section titulo="Próximas Votaciones" />
+			<Section titulo="Votaciones Pasadas" />
 		</main>
 	);
 }

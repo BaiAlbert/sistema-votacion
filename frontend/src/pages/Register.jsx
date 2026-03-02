@@ -13,12 +13,13 @@ import { Input } from '../components/Input';
 function Register() {
 	// Estado para todos los campos del formulario
 	const [formData, setFormData] = useState({
+		dni: '',
 		username: '',
 		password: '',
 		nombre: '',
 		apellidos: '',
 		email: '',
-		telefono: '',
+		num_telefono: '',
 		provincia: '',
 		ciudad: '',
 	});
@@ -88,6 +89,12 @@ function Register() {
 				{error && <p style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
 				{/* Usamos CSS grid para organizar los inputs en dos columnas */}
 				<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+					<Input
+						name="dni"
+						placeholder="DNI"
+						onChange={handleChange}
+						estiloExtra={{ gridColumn: 'span 2' }}
+					></Input>
 					<Input name="username" placeholder="Usuario" onChange={handleChange}></Input>
 					<Input name="password" type="password" placeholder="Contraseña" onChange={handleChange}></Input>
 					<Input name="nombre" type="text" placeholder="Nombre" onChange={handleChange}></Input>
@@ -99,7 +106,7 @@ function Register() {
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
 					></Input>
-					<Input name="telefono" type="tel" placeholder="Telefono" onChange={handleChange}></Input>
+					<Input name="num_telefono" type="tel" placeholder="Telefono" onChange={handleChange}></Input>
 					<Input name="provincia" type="text" placeholder="Provincia" onChange={handleChange}></Input>
 					<Input
 						name="ciudad"

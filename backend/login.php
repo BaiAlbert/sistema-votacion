@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $input['password'];
 
     // Preparamos la consulta SQL para buscar al usuario por su email
-    $sql = "SELECT id, username, password, nombre FROM usuarios WHERE email = ?";
+    $sql = "SELECT id, dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol, fecha_creacion FROM usuarios WHERE email = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
