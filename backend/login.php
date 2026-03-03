@@ -34,12 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Preparamos la consulta SQL para buscar al usuario por su email
     $sql = "SELECT id, dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol, fecha_creacion FROM usuarios WHERE email = ?";
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$email]);
 
     // Comprobamos si el usuario existe en la base de datos
-    if ($user = $result->fetch_assoc()) {
+    if ($user = $stmt->fetch()) {
         // Verificamos si la contraseña enviada coincide con el hash almacenado
         if (password_verify($password, $user['password'])) {
             // Si la contraseña es correcta eliminamos la contraseña del objeto antes de enviarlo
@@ -57,7 +55,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code(401);
         echo json_encode(["error" => "Usuario no encontrado"]);
     }
-
-    $stmt->close();
 }
-$conexion->close();
+$conexion = null;

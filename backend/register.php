@@ -43,26 +43,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provincia = $input['provincia'] ?? '';
     $ciudad = $input['ciudad'] ?? '';
 
+    // Validar DNI (8 números y 1 letra)
+    if (!preg_match('/^[0-9]{8}[A-Za-z]$/', $dni)) {
+        http_response_code(400);
+        echo json_encode(["error" => "El DNI debe tener 8 números y una letra"]);
+        exit;
+    }
+
+    // Validar Email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode(["error" => "El formato del correo es inválido"]);
+        exit;
+    }
+
+    // Validar Teléfono
+    if (!empty($num_telefono) && !preg_match('/^[0-9]{9}$/', $num_telefono)) {
+        http_response_code(400);
+        echo json_encode(["error" => "El teléfono debe tener 9 números"]);
+        exit;
+    }
+
     // Preparamos la sentencia SQL INSERT
     // Usamos signos de interrogación (?) como marcadores para prevenir inyección SQL
     $sql = "INSERT INTO usuarios (dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $stmt = $conexion->prepare($sql);
-
-    // Vinculamos los parámetros a la sentencia preparada
-    // "sssssssss" indica que todos son strings
-    $stmt->bind_param("sssssssss", $dni, $username, $password, $nombre, $apellidos, $email, $num_telefono, $provincia, $ciudad);
-
-    // Ejecutamos la consulta
-    if ($stmt->execute()) {
-        echo json_encode(["message" => "Usuario registrado con éxito"]);
-    } else {
+    try {
+        $stmt = $conexion->prepare($sql);
+        // Ejecutamos la consulta
+        if ($stmt->execute([$dni, $username, $password, $nombre, $apellidos, $email, $num_telefono, $provincia, $ciudad])) {
+            echo json_encode(["message" => "Usuario registrado con éxito"]);
+        }
+    } catch (PDOException $e) {
         // Si falla (ej. usuario o email duplicado), devolvemos error 500
         http_response_code(500);
-        echo json_encode(["error" => "Error al registrar: " . $stmt->error]);
+        echo json_encode(["error" => "Error al registrar: " . $e->getMessage()]);
     }
-
-    $stmt->close();
 }
-$conexion->close();
+$conexion = null;
