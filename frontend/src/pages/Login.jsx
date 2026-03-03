@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
-import { motion } from 'motion/react';
 import { Input } from '../components/Input';
+import { Button } from '../components/Button';
 
 /**
  * Componente de Página de Inicio de Sesión
@@ -68,29 +70,6 @@ function Login() {
 		boxSizing: 'border-box',
 	};
 
-	const estiloLoginInput = {
-		display: 'block',
-		width: '100%',
-		padding: '0.8rem',
-		marginBottom: '1rem',
-		borderRadius: '8px',
-		border: '1px solid rgba(255, 255, 255, 0.1)',
-		backgroundColor: 'rgba(15, 23, 42, 0.6)',
-		color: '#f8fafc',
-		boxSizing: 'border-box',
-	};
-
-	const estiloLoginBoton = {
-		width: '100%',
-		padding: '0.8rem',
-		backgroundColor: '#2563eb',
-		color: 'white',
-		border: 'none',
-		borderRadius: '8px',
-		fontWeight: 'bold',
-		cursor: 'pointer',
-	};
-
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 30 }}
@@ -131,9 +110,9 @@ function Login() {
 						isInvalid={invalidField === 'password'}
 					/>
 
-					<button type="submit" style={estiloLoginBoton}>
+					<Button type="submit" width="100%">
 						Entrar
-					</button>
+					</Button>
 				</form>
 
 				<p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>

@@ -1,3 +1,5 @@
+import { Button } from '../components/Button';
+
 export function Body() {
 	const estiloMainBody = {
 		paddingTop: '120px',
@@ -66,18 +68,6 @@ function Card({ titulo }) {
 		transition: 'transform 0.2s ease',
 	};
 
-	const estiloBodyCardButton = {
-		marginTop: '1rem',
-		padding: '0.5rem 1rem',
-		backgroundColor: '#2563eb',
-		border: 'none',
-		borderRadius: '4px',
-		color: 'white',
-		cursor: 'pointer',
-		width: '100%',
-		fontWeight: 'bold',
-	};
-
 	return (
 		<div style={estiloBodyCard}>
 			<h3 style={{ marginTop: 0 }}>{titulo}</h3>
@@ -87,7 +77,9 @@ function Card({ titulo }) {
 				Este texto esta aquí como ejemplo.
 			</p>
 
-			<button style={estiloBodyCardButton}>Ver más</button>
+			<Button width="100%" estiloExtra={{ marginTop: '1rem' }}>
+				Ver más
+			</Button>
 		</div>
 	);
 }

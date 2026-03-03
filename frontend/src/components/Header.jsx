@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Button } from './Button';
 
 /**
  * Componente de Header
@@ -42,23 +43,6 @@ export function Header({ titulo }) {
 		gap: '1rem',
 	};
 
-	const estiloBoton = {
-		padding: '0.5rem 1rem',
-		border: 'none',
-		borderRadius: '4px',
-		cursor: 'pointer',
-		backgroundColor: '#2563eb',
-		color: 'white',
-		fontWeight: 'bold',
-	};
-
-	const estiloBotonSecundario = {
-		...estiloBoton,
-		backgroundColor: 'transparent',
-		color: '#38bdf8',
-		border: '1px solid #38bdf8',
-	};
-
 	return (
 		<header style={estiloHeader}>
 			<h1 style={{ margin: 0, fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
@@ -70,22 +54,21 @@ export function Header({ titulo }) {
 				{user ? (
 					<>
 						<p>Bienvenido, {user.username}</p>
-						<button
-							style={estiloBoton}
+						<Button
 							onClick={() => {
 								logout(); // Limpia el estado global
 								navigate('/login'); // Redirige al login
 							}}
 						>
 							Cerrar Sesión
-						</button>
+						</Button>
 					</>
 				) : (
-					<button style={estiloBoton} onClick={() => navigate('/login')}>
+					<Button onClick={() => navigate('/login')}>
 						Iniciar Sesión
-					</button>
+					</Button>
 				)}
-				<button style={estiloBotonSecundario}>Ayuda</button>
+				<Button secondary>Ayuda</Button>
 			</nav>
 		</header>
 	);

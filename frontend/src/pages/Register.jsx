@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'motion/react';
 import { authService } from '../services/authService';
 import { Input } from '../components/Input';
-import { motion } from 'motion/react';
+import { Button } from '../components/Button';
 
 /**
  * Componente de Página de Registro
@@ -108,18 +110,6 @@ function Register() {
 		boxSizing: 'border-box',
 	};
 
-	const buttonStyle = {
-		width: '100%',
-		padding: '0.8rem',
-		backgroundColor: '#2563eb',
-		color: 'white',
-		border: 'none',
-		borderRadius: '8px',
-		fontWeight: 'bold',
-		cursor: 'pointer',
-		marginTop: '1rem',
-	};
-
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 30 }}
@@ -174,9 +164,9 @@ function Register() {
 						isInvalid={invalidField === 'ciudad'}
 					></Input>
 
-					<button type="submit" style={{ ...buttonStyle, gridColumn: 'span 2' }}>
+					<Button type="submit" width="100%" estiloExtra={{ gridColumn: 'span 2', marginTop: '1rem' }}>
 						Registrarse
-					</button>
+					</Button>
 				</form>
 				<p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
 					¿Ya tienes cuenta?{' '}
