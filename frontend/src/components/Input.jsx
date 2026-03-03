@@ -33,9 +33,9 @@ export function Input({ name, type, placeholder, onChange, estiloExtra }) {
 		padding: '0.8rem',
 		marginBottom: '0.8rem',
 		borderRadius: '8px',
-		border: '1px solid rgba(255, 255, 255, 0.3)',
-		backgroundColor: 'rgba(0, 0, 0, 0.2)',
-		color: 'white',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		backgroundColor: 'rgba(15, 23, 42, 0.6)',
+		color: '#f8fafc',
 		boxSizing: 'border-box',
 	};
 

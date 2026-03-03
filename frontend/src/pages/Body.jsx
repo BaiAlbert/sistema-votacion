@@ -56,25 +56,26 @@ function Card({ titulo }) {
 	const estiloBodyCard = {
 		flex: '1',
 		minWidth: '250px',
-		backgroundColor: 'rgba(80, 80, 80, 0.5)',
-		// backdropFilter: 'blur(10px)',
+		backgroundColor: 'rgba(30, 41, 59, 0.6)',
+		backdropFilter: 'blur(10px)',
 		padding: '2rem',
 		borderRadius: '16px',
-		border: '1px solid rgba(255, 255, 255, 0.2)',
-		boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-		color: 'white',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+		color: '#f8fafc',
 		transition: 'transform 0.2s ease',
 	};
 
 	const estiloBodyCardButton = {
 		marginTop: '1rem',
 		padding: '0.5rem 1rem',
-		backgroundColor: 'rgba(255, 255, 255, 0.2)',
+		backgroundColor: '#2563eb',
 		border: 'none',
 		borderRadius: '4px',
 		color: 'white',
 		cursor: 'pointer',
 		width: '100%',
+		fontWeight: 'bold',
 	};
 
 	return (

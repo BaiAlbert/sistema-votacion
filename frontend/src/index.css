@@ -29,11 +29,8 @@ body {
 	min-width: 320px;
 	min-height: 100vh;
 
-	/* Imagen de fondo para toda la página */
-	background-image: url('assets/415791049_3a09406a-b4d9-426c-822e-0eb7881b74b1.svg');
-	background-size: cover; /* Cubre todo el espacio */
-	background-position: center; /* Centrada */
-	background-repeat: no-repeat;
+	/* Fondo con gradiente oscuro profesional para sistema de votación */
+	background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
 	background-attachment: fixed; /* Fija al hacer scroll */
 }
 
@@ -49,12 +46,16 @@ button {
 	font-size: 1em;
 	font-weight: 500;
 	font-family: inherit;
-	background-color: #1a1a1a;
+	background-color: #2563eb;
+	color: white;
 	cursor: pointer;
-	transition: border-color 0.25s;
+	transition:
+		background-color 0.25s,
+		border-color 0.25s;
 }
 button:hover {
-	border-color: #646cff;
+	background-color: #1d4ed8;
+	border-color: #1e40af;
 }
 button:focus,
 button:focus-visible {

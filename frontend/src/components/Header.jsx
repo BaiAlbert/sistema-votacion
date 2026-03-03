@@ -30,12 +30,12 @@ export function Header({ titulo }) {
 		alignItems: 'center',
 		padding: '1rem 2rem',
 
-		backgroundColor: 'rgba(245, 245, 245, 0.4)',
+		backgroundColor: 'rgba(15, 23, 42, 0.6)',
 		backdropFilter: 'blur(12px)',
 		borderRadius: '24px',
-		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-		border: '1px solid rgba(255, 255, 255, 0.4)',
-		color: '#333',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		color: '#f8fafc',
 	};
 
 	const estiloNav = {
@@ -48,7 +48,7 @@ export function Header({ titulo }) {
 		border: 'none',
 		borderRadius: '4px',
 		cursor: 'pointer',
-		backgroundColor: '#007bff',
+		backgroundColor: '#2563eb',
 		color: 'white',
 		fontWeight: 'bold',
 	};
@@ -56,8 +56,8 @@ export function Header({ titulo }) {
 	const estiloBotonSecundario = {
 		...estiloBoton,
 		backgroundColor: 'transparent',
-		color: '#007bff',
-		border: '1px solid #007bff',
+		color: '#38bdf8',
+		border: '1px solid #38bdf8',
 	};
 
 	return (

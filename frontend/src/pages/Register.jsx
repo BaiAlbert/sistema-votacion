@@ -58,13 +58,13 @@ function Register() {
 
 	// Estilos "Glassmorphism" reutilizados
 	const cardStyle = {
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-		backdropFilter: 'blur(10px)',
+		backgroundColor: 'rgba(30, 41, 59, 0.6)',
+		backdropFilter: 'blur(12px)',
 		padding: '2rem',
 		borderRadius: '16px',
-		border: '1px solid rgba(255, 255, 255, 0.2)',
-		boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-		color: 'white',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+		color: '#f8fafc',
 		maxWidth: '500px',
 		width: '100%',
 		margin: '100px auto',
@@ -73,7 +73,7 @@ function Register() {
 	const buttonStyle = {
 		width: '100%',
 		padding: '0.8rem',
-		backgroundColor: '#007bff',
+		backgroundColor: '#2563eb',
 		color: 'white',
 		border: 'none',
 		borderRadius: '8px',
@@ -124,7 +124,7 @@ function Register() {
 					¿Ya tienes cuenta?{' '}
 					<span
 						onClick={() => navigate('/login')}
-						style={{ color: '#4facfe', cursor: 'pointer', textDecoration: 'underline' }}
+						style={{ color: '#38bdf8', cursor: 'pointer', textDecoration: 'underline' }}
 					>
 						Inicia sesión
 					</span>

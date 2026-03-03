@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import { motion } from 'motion/react';
 
 /**
  * Componente de Página de Inicio de Sesión
@@ -44,13 +45,13 @@ function Login() {
 	};
 
 	const estiloLoginCard = {
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-		backdropFilter: 'blur(10px)',
+		backgroundColor: 'rgba(30, 41, 59, 0.6)',
+		backdropFilter: 'blur(12px)',
 		padding: '2rem',
 		borderRadius: '16px',
-		border: '1px solid rgba(255, 255, 255, 0.2)',
-		boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-		color: 'white',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+		color: '#f8fafc',
 		maxWidth: '400px',
 		width: '100%',
 		margin: '150px auto', // Margen superior para no chocar con el header
@@ -62,16 +63,16 @@ function Login() {
 		padding: '0.8rem',
 		marginBottom: '1rem',
 		borderRadius: '8px',
-		border: '1px solid rgba(255, 255, 255, 0.3)',
-		backgroundColor: 'rgba(0, 0, 0, 0.2)',
-		color: 'white',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		backgroundColor: 'rgba(15, 23, 42, 0.6)',
+		color: '#f8fafc',
 		boxSizing: 'border-box',
 	};
 
 	const estiloLoginBoton = {
 		width: '100%',
 		padding: '0.8rem',
-		backgroundColor: '#007bff',
+		backgroundColor: '#2563eb',
 		color: 'white',
 		border: 'none',
 		borderRadius: '8px',
@@ -80,10 +81,14 @@ function Login() {
 	};
 
 	return (
-		<div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1, rotate: 3600, transition: {duration: 30}}}
+			style={{ display: 'flex', justifyContent: 'center', width: '100%' }}
+		>
 			<div style={estiloLoginCard}>
 				<h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Iniciar Sesión</h2>
-				
+
 				{error && <p style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
 
 				<form onSubmit={handleSubmit}>
@@ -109,18 +114,18 @@ function Login() {
 						Entrar
 					</button>
 				</form>
-				
+
 				<p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
 					¿No tienes cuenta?{' '}
 					<span
 						onClick={() => navigate('/register')}
-						style={{ color: '#4facfe', cursor: 'pointer', textDecoration: 'underline' }}
+						style={{ color: '#38bdf8', cursor: 'pointer', textDecoration: 'underline' }}
 					>
 						Regístrate aquí
 					</span>
 				</p>
 			</div>
-		</div>
+		</motion.div>
 	);
 }
 
