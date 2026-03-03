@@ -31,6 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $input['email'];
     $password = $input['password'];
 
+    // Validar Email con su respectivo formato antes de ir a BD
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode(["error" => "El formato del correo es inválido"]);
+        exit;
+    }
+
     // Preparamos la consulta SQL para buscar al usuario por su email
     $sql = "SELECT id, dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol, fecha_creacion FROM usuarios WHERE email = ?";
     $stmt = $conexion->prepare($sql);

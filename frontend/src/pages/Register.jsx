@@ -44,6 +44,31 @@ function Register() {
 		e.preventDefault();
 		setError('');
 
+		// Validaciones FRONTEND sincronizadas con los requisitos del backend
+		const textRegex = /^[\p{L}\s\-']+$/u;
+		const dniRegex = /^[0-9]{8}[A-Za-z]$/;
+		const phoneRegex = /^[0-9]{9}$/;
+
+		// Comprobación de integridad
+		if (!dniRegex.test(formData.dni)) {
+			return setError('El DNI debe tener 8 números y una letra.');
+		}
+		if (formData.nombre && !textRegex.test(formData.nombre)) {
+			return setError('El nombre no puede contener números ni caracteres especiales.');
+		}
+		if (formData.apellidos && !textRegex.test(formData.apellidos)) {
+			return setError('Los apellidos no pueden contener números ni caracteres especiales.');
+		}
+		if (formData.provincia && !textRegex.test(formData.provincia)) {
+			return setError('La provincia no puede contener números ni caracteres especiales.');
+		}
+		if (formData.ciudad && !textRegex.test(formData.ciudad)) {
+			return setError('La ciudad no puede contener números ni caracteres especiales.');
+		}
+		if (formData.num_telefono && !phoneRegex.test(formData.num_telefono)) {
+			return setError('El teléfono debe tener exactamente 9 números.');
+		}
+
 		try {
 			// Llamamos al servicio de registro
 			await authService.register(formData);
@@ -92,26 +117,29 @@ function Register() {
 					<Input
 						name="dni"
 						placeholder="DNI"
+						maxLength="9"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
 					></Input>
-					<Input name="username" placeholder="Usuario" onChange={handleChange}></Input>
+					<Input name="username" placeholder="Usuario" maxLength="50" onChange={handleChange}></Input>
 					<Input name="password" type="password" placeholder="Contraseña" onChange={handleChange}></Input>
-					<Input name="nombre" type="text" placeholder="Nombre" onChange={handleChange}></Input>
-					<Input name="apellidos" type="text" placeholder="Apellidos" onChange={handleChange}></Input>
+					<Input name="nombre" type="text" placeholder="Nombre" maxLength="50" onChange={handleChange}></Input>
+					<Input name="apellidos" type="text" placeholder="Apellidos" maxLength="100" onChange={handleChange}></Input>
 					<Input
 						name="email"
 						type="email"
 						placeholder="Correo electronico"
+						maxLength="100"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
 					></Input>
-					<Input name="num_telefono" type="tel" placeholder="Telefono" onChange={handleChange}></Input>
-					<Input name="provincia" type="text" placeholder="Provincia" onChange={handleChange}></Input>
+					<Input name="num_telefono" type="tel" placeholder="Telefono" maxLength="9" onChange={handleChange}></Input>
+					<Input name="provincia" type="text" placeholder="Provincia" maxLength="50" onChange={handleChange}></Input>
 					<Input
 						name="ciudad"
 						type="text"
 						placeholder="Ciudad"
+						maxLength="50"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
 					></Input>

@@ -43,6 +43,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provincia = $input['provincia'] ?? '';
     $ciudad = $input['ciudad'] ?? '';
 
+    // Obtener límites de caracteres dinámicamente desde la base de datos
+    // $db viene incluido desde config/db.php
+    $limites_stmt = $conexion->prepare("SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'usuarios'");
+    $limites_stmt->execute([$db]);
+    $limites = $limites_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    $max_username = $limites['username'] ?? 50;
+    $max_email = $limites['email'] ?? 100;
+    $max_nombre = $limites['nombre'] ?? 50;
+    $max_apellidos = $limites['apellidos'] ?? 100;
+    $max_provincia = $limites['provincia'] ?? 50;
+    $max_ciudad = $limites['ciudad'] ?? 50;
+
+    // Validar Username (dinámico)
+    if (strlen($username) > $max_username) {
+        http_response_code(400);
+        echo json_encode(["error" => "El nombre de usuario no puede exceder los $max_username caracteres"]);
+        exit;
+    }
+
+    // Validar Email (dinámico)
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > $max_email) {
+        http_response_code(400);
+        echo json_encode(["error" => "El formato del correo es inválido o excede los $max_email caracteres"]);
+        exit;
+    }
+
     // Validar DNI (8 números y 1 letra)
     if (!preg_match('/^[0-9]{8}[A-Za-z]$/', $dni)) {
         http_response_code(400);
@@ -50,18 +77,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Validar Email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    // Validar Nombre (sin números, dinámico)
+    if (!empty($nombre)) {
+        if (!preg_match('/^[\p{L}\s\-\']+$/u', $nombre)) {
+            http_response_code(400);
+            echo json_encode(["error" => "El nombre no puede contener números ni caracteres inválidos"]);
+            exit;
+        }
+        if (strlen($nombre) > $max_nombre) {
+            http_response_code(400);
+            echo json_encode(["error" => "El nombre no puede exceder los $max_nombre caracteres"]);
+            exit;
+        }
+    }
+
+    // Validar Apellidos (sin números, dinámico)
+    if (!empty($apellidos)) {
+        if (!preg_match('/^[\p{L}\s\-\']+$/u', $apellidos)) {
+            http_response_code(400);
+            echo json_encode(["error" => "Los apellidos no pueden contener números ni caracteres inválidos"]);
+            exit;
+        }
+        if (strlen($apellidos) > $max_apellidos) {
+            http_response_code(400);
+            echo json_encode(["error" => "Los apellidos no pueden exceder los $max_apellidos caracteres"]);
+            exit;
+        }
+    }
+
+    // Validar Teléfono (9 números, sin letras)
+    if (!empty($num_telefono) && !preg_match('/^[0-9]{9}$/', $num_telefono)) {
         http_response_code(400);
-        echo json_encode(["error" => "El formato del correo es inválido"]);
+        echo json_encode(["error" => "El teléfono debe tener 9 números exactos"]);
         exit;
     }
 
-    // Validar Teléfono
-    if (!empty($num_telefono) && !preg_match('/^[0-9]{9}$/', $num_telefono)) {
-        http_response_code(400);
-        echo json_encode(["error" => "El teléfono debe tener 9 números"]);
-        exit;
+    // Validar Provincia (sin números, dinámico)
+    if (!empty($provincia)) {
+        if (!preg_match('/^[\p{L}\s\-\']+$/u', $provincia)) {
+            http_response_code(400);
+            echo json_encode(["error" => "La provincia no puede contener números ni caracteres inválidos"]);
+            exit;
+        }
+        if (strlen($provincia) > $max_provincia) {
+            http_response_code(400);
+            echo json_encode(["error" => "La provincia no puede exceder los $max_provincia caracteres"]);
+            exit;
+        }
+    }
+
+    // Validar Ciudad (sin números, dinámico)
+    if (!empty($ciudad)) {
+        if (!preg_match('/^[\p{L}\s\-\']+$/u', $ciudad)) {
+            http_response_code(400);
+            echo json_encode(["error" => "La ciudad no puede contener números ni caracteres inválidos"]);
+            exit;
+        }
+        if (strlen($ciudad) > $max_ciudad) {
+            http_response_code(400);
+            echo json_encode(["error" => "La ciudad no puede exceder los $max_ciudad caracteres"]);
+            exit;
+        }
     }
 
     // Preparamos la sentencia SQL INSERT

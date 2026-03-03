@@ -29,6 +29,12 @@ function Login() {
 		e.preventDefault();
 		setError('');
 
+		// Validación de email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			return setError('El formato del correo electrónico es inválido.');
+		}
+
 		try {
 			// Intentamos loguear con el servicio
 			const user = await authService.login(email, password);
@@ -83,7 +89,7 @@ function Login() {
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
-			animate={{ opacity: 1, rotate: 3600, transition: {duration: 30}}}
+			animate={{ opacity: 1, rotate: 3600, transition: { duration: 30 } }}
 			style={{ display: 'flex', justifyContent: 'center', width: '100%' }}
 		>
 			<div style={estiloLoginCard}>
