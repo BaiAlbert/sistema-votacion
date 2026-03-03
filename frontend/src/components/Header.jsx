@@ -19,11 +19,11 @@ export function Header({ titulo }) {
 	// Estilos en línea para el header (simulando "glass effect")
 	const estiloHeader = {
 		position: 'fixed',
-		top: '1em',
-		left: '50%',
-		transform: 'translateX(-50%)',
-		width: '94%',
+		top: '0',
+		left: '0',
+		width: '100%',
 		zIndex: 1000,
+		boxSizing: 'border-box',
 
 		display: 'flex',
 		justifyContent: 'space-between',
@@ -32,9 +32,8 @@ export function Header({ titulo }) {
 
 		backgroundColor: 'rgba(15, 23, 42, 0.6)',
 		backdropFilter: 'blur(12px)',
-		borderRadius: '24px',
 		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-		border: '1px solid rgba(255, 255, 255, 0.1)',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
 		color: '#f8fafc',
 	};
 

@@ -1,32 +1,17 @@
+import { motion } from 'motion/react';
+
 /**
- * Componente de Input Reutilizable.
- * * Es un campo de entrada con estilos base predefinidos (tema oscuro/transparente)
- * que permite la inyección de estilos adicionales y manejo de eventos.
+ * Componente de Input Reutilizable con Animaciones.
  *
- * @param {Object} props - Las propiedades del componente.
- * @param {string} props.name - El nombre del campo (atributo `name`), útil para formularios.
- * @param {string} props.type - El tipo de input HTML (ej: 'text', 'email', 'password', etc.).
- * @param {string} [props.placeholder] - (Opcional) Texto de ayuda que se muestra cuando el campo está vacío.
- * @param {function} [props.onChange] - Función manejadora que se ejecuta al escribir en el input. Recibe el evento.
- * @param {Object} [props.estiloExtra] - Objeto de estilos en línea para sobrescribir o añadir CSS al input.
- * @returns {JSX.Element} Elemento input estilizado.
- * @example
- * // Ejemplo de uso básico:
- * <Input
- * name="email"
- * type="email"
- * placeholder="usuario@ejemplo.com"
- * onChange={(e) => console.log(e.target.value)}
- * />
- * @example
- * // Ejemplo con estilo extra (Grid):
- * <Input
- * name="apellido"
- * type="text"
- * estiloExtra={{ gridColumn: 'span 2', borderColor: 'red' }}
- * />
+ * @param {Object} props
+ * @param {string} props.name
+ * @param {string} props.type
+ * @param {string} [props.placeholder]
+ * @param {function} [props.onChange]
+ * @param {Object} [props.estiloExtra]
+ * @param {boolean} [props.isInvalid] - Determina si el input tiene un error de validación actual
  */
-export function Input({ name, type, placeholder, onChange, estiloExtra }) {
+export function Input({ name, type, placeholder, maxLength, onChange, estiloExtra, isInvalid }) {
 	const estiloInput = {
 		display: 'block',
 		width: '100%',
@@ -40,13 +25,28 @@ export function Input({ name, type, placeholder, onChange, estiloExtra }) {
 	};
 
 	return (
-		<input
+		<motion.input
 			name={name}
 			type={type}
 			placeholder={placeholder}
+			maxLength={maxLength}
 			onChange={onChange}
 			required
 			style={estiloExtra ? { ...estiloInput, ...estiloExtra } : estiloInput}
+			animate={
+				isInvalid
+					? {
+						backgroundColor: ['rgba(239, 68, 68, 0.4)', 'rgba(239, 68, 68, 0.1)'], // Flash rojo brillante -> fondo rojo suave
+						borderColor: ['rgba(239, 68, 68, 1)', 'rgba(239, 68, 68, 0.5)'],
+						x: [-5, 5, -5, 5, 0], // Pequeño temblor (shake) para avisar de error
+					}
+					: {
+						backgroundColor: 'rgba(15, 23, 42, 0.6)',
+						borderColor: 'rgba(255, 255, 255, 0.1)',
+						x: 0,
+					}
+			}
+			transition={{ duration: 0.4 }}
 		/>
 	);
 }

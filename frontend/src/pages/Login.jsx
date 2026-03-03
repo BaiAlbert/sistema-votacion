@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import { motion } from 'motion/react';
+import { Input } from '../components/Input';
 
 /**
  * Componente de Página de Inicio de Sesión
@@ -16,6 +17,7 @@ function Login() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
+	const [invalidField, setInvalidField] = useState(''); // Guarda qué campo dio error
 
 	const navigate = useNavigate(); // Hook para navegación
 	const { login } = useAuth(); // Obtenemos la función login del contexto
@@ -28,10 +30,12 @@ function Login() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError('');
+		setInvalidField('');
 
 		// Validación de email
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
+			setInvalidField('email');
 			return setError('El formato del correo electrónico es inválido.');
 		}
 
@@ -60,7 +64,8 @@ function Login() {
 		color: '#f8fafc',
 		maxWidth: '400px',
 		width: '100%',
-		margin: '150px auto', // Margen superior para no chocar con el header
+		// Removed margin: '150px auto',
+		boxSizing: 'border-box',
 	};
 
 	const estiloLoginInput = {
@@ -88,32 +93,42 @@ function Login() {
 
 	return (
 		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1, rotate: 3600, transition: { duration: 30 } }}
-			style={{ display: 'flex', justifyContent: 'center', width: '100%' }}
+			initial={{ opacity: 0, y: 30 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -30 }}
+			transition={{ duration: 0.5, ease: 'easeOut' }}
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				minHeight: '95vh',
+				boxSizing: 'border-box',
+				width: '100%',
+				padding: '60px 1rem 1rem 1rem', // padding de seguridad para evitar solapamientos
+			}}
 		>
 			<div style={estiloLoginCard}>
-				<h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Iniciar Sesión</h2>
+				<h2 style={{ textAlign: 'center', marginBottom: '1.2rem' }}>Iniciar Sesión</h2>
 
-				{error && <p style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
+				{error && <p style={{ color: '#ff6b6b', textAlign: 'center', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>{error}</p>}
 
 				<form onSubmit={handleSubmit}>
-					<input
+					<Input
+						name="email"
 						type="email"
 						placeholder="Email"
 						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-						style={estiloLoginInput}
+						onChange={(e) => { setEmail(e.target.value); if (invalidField === 'email') setInvalidField('') }}
+						isInvalid={invalidField === 'email'}
 					/>
 
-					<input
+					<Input
+						name="password"
 						type="password"
 						placeholder="Contraseña"
 						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-						style={estiloLoginInput}
+						onChange={(e) => { setPassword(e.target.value); if (invalidField === 'password') setInvalidField('') }}
+						isInvalid={invalidField === 'password'}
 					/>
 
 					<button type="submit" style={estiloLoginBoton}>

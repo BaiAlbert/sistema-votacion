@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { Input } from '../components/Input';
+import { motion } from 'motion/react';
 
 /**
  * Componente de Página de Registro
@@ -11,7 +12,6 @@ import { Input } from '../components/Input';
  * enviándola al backend a través de `authService`.
  */
 function Register() {
-	// Estado para todos los campos del formulario
 	const [formData, setFormData] = useState({
 		dni: '',
 		username: '',
@@ -24,17 +24,23 @@ function Register() {
 		ciudad: '',
 	});
 	const [error, setError] = useState('');
+	const [invalidField, setInvalidField] = useState('');
 	const navigate = useNavigate();
 
 	/**
 	 * Manejador genérico para cambios en inputs.
-	 * Actualiza el campo correspondiente en el estado `formData` basándose en el atributo `name` del input.
+	 * Actualiza el estado y limpia los errores visuales si el usuario está corrigiendo un campo.
 	 */
 	const handleChange = (e) => {
 		setFormData({
 			...formData,
 			[e.target.name]: e.target.value,
 		});
+
+		// Si el usuario modifica el campo que estaba marcado como inválido, quitamos la alerta roja
+		if (invalidField === e.target.name) {
+			setInvalidField('');
+		}
 	};
 
 	/**
@@ -43,29 +49,36 @@ function Register() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError('');
+		setInvalidField('');
 
 		// Validaciones FRONTEND sincronizadas con los requisitos del backend
 		const textRegex = /^[\p{L}\s\-']+$/u;
 		const dniRegex = /^[0-9]{8}[A-Za-z]$/;
 		const phoneRegex = /^[0-9]{9}$/;
 
-		// Comprobación de integridad
+		// Comprobación de integridad asignando el campo con error
 		if (!dniRegex.test(formData.dni)) {
+			setInvalidField('dni');
 			return setError('El DNI debe tener 8 números y una letra.');
 		}
 		if (formData.nombre && !textRegex.test(formData.nombre)) {
+			setInvalidField('nombre');
 			return setError('El nombre no puede contener números ni caracteres especiales.');
 		}
 		if (formData.apellidos && !textRegex.test(formData.apellidos)) {
+			setInvalidField('apellidos');
 			return setError('Los apellidos no pueden contener números ni caracteres especiales.');
 		}
 		if (formData.provincia && !textRegex.test(formData.provincia)) {
+			setInvalidField('provincia');
 			return setError('La provincia no puede contener números ni caracteres especiales.');
 		}
 		if (formData.ciudad && !textRegex.test(formData.ciudad)) {
+			setInvalidField('ciudad');
 			return setError('La ciudad no puede contener números ni caracteres especiales.');
 		}
 		if (formData.num_telefono && !phoneRegex.test(formData.num_telefono)) {
+			setInvalidField('num_telefono');
 			return setError('El teléfono debe tener exactamente 9 números.');
 		}
 
@@ -92,7 +105,7 @@ function Register() {
 		color: '#f8fafc',
 		maxWidth: '500px',
 		width: '100%',
-		margin: '100px auto',
+		boxSizing: 'border-box',
 	};
 
 	const buttonStyle = {
@@ -108,10 +121,24 @@ function Register() {
 	};
 
 	return (
-		<div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+		<motion.div
+			initial={{ opacity: 0, y: 30 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -30 }}
+			transition={{ duration: 0.5, ease: 'easeOut' }}
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				minHeight: '95vh',
+				boxSizing: 'border-box',
+				width: '100%',
+				padding: '60px 1rem 1rem 1rem', // padding de seguridad para evitar solapamientos
+			}}
+		>
 			<div style={cardStyle}>
-				<h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Registro</h2>
-				{error && <p style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
+				<h2 style={{ textAlign: 'center', marginBottom: '1.2rem' }}>Registro</h2>
+				{error && <p style={{ color: '#ff6b6b', textAlign: 'center', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>{error}</p>}
 				{/* Usamos CSS grid para organizar los inputs en dos columnas */}
 				<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
 					<Input
@@ -120,11 +147,12 @@ function Register() {
 						maxLength="9"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
+						isInvalid={invalidField === 'dni'}
 					></Input>
-					<Input name="username" placeholder="Usuario" maxLength="50" onChange={handleChange}></Input>
-					<Input name="password" type="password" placeholder="Contraseña" onChange={handleChange}></Input>
-					<Input name="nombre" type="text" placeholder="Nombre" maxLength="50" onChange={handleChange}></Input>
-					<Input name="apellidos" type="text" placeholder="Apellidos" maxLength="100" onChange={handleChange}></Input>
+					<Input name="username" placeholder="Usuario" maxLength="50" onChange={handleChange} isInvalid={invalidField === 'username'}></Input>
+					<Input name="password" type="password" placeholder="Contraseña" onChange={handleChange} isInvalid={invalidField === 'password'}></Input>
+					<Input name="nombre" type="text" placeholder="Nombre" maxLength="50" onChange={handleChange} isInvalid={invalidField === 'nombre'}></Input>
+					<Input name="apellidos" type="text" placeholder="Apellidos" maxLength="100" onChange={handleChange} isInvalid={invalidField === 'apellidos'}></Input>
 					<Input
 						name="email"
 						type="email"
@@ -132,9 +160,10 @@ function Register() {
 						maxLength="100"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
+						isInvalid={invalidField === 'email'}
 					></Input>
-					<Input name="num_telefono" type="tel" placeholder="Telefono" maxLength="9" onChange={handleChange}></Input>
-					<Input name="provincia" type="text" placeholder="Provincia" maxLength="50" onChange={handleChange}></Input>
+					<Input name="num_telefono" type="tel" placeholder="Telefono" maxLength="9" onChange={handleChange} isInvalid={invalidField === 'num_telefono'}></Input>
+					<Input name="provincia" type="text" placeholder="Provincia" maxLength="50" onChange={handleChange} isInvalid={invalidField === 'provincia'}></Input>
 					<Input
 						name="ciudad"
 						type="text"
@@ -142,6 +171,7 @@ function Register() {
 						maxLength="50"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
+						isInvalid={invalidField === 'ciudad'}
 					></Input>
 
 					<button type="submit" style={{ ...buttonStyle, gridColumn: 'span 2' }}>
@@ -158,7 +188,7 @@ function Register() {
 					</span>
 				</p>
 			</div>
-		</div>
+		</motion.div>
 	);
 }
 
