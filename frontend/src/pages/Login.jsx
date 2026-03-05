@@ -42,11 +42,11 @@ function Login() {
 		}
 
 		try {
-			// Intentamos loguear con el servicio
-			const user = await authService.login(email, password);
+			// Intentamos loguear con el servicio y obtenemos el token
+			const token = await authService.login(email, password);
 
-			// Si funciona, actualizamos el estado global
-			login(user);
+			// Si funciona, actualizamos el estado global pasándole el token
+			await login(token);
 
 			// Redirigimos a la home
 			navigate('/');

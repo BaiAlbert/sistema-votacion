@@ -53,6 +53,11 @@ export function Header({ titulo }) {
 				{/* Renderizado condicional: Si hay usuario, mostramos "Cerrar Sesión", si no "Iniciar Sesión" */}
 				{user ? (
 					<>
+						{(user.rol == "admin_privado" || user.rol == "admin_gobierno") && (
+							<Button onClick={() => navigate('/admin')} secondary>
+								Crear votación
+							</Button>
+						)}
 						<p>Bienvenido, {user.username}</p>
 						<Button
 							onClick={() => {

@@ -1,4 +1,5 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
+import { authService } from '../services/authService';
 
 // Creamos el contexto que almacenará el estado global de autenticación
 const AuthContext = createContext(null);
@@ -18,28 +19,60 @@ export const AuthProvider = ({ children }) => {
 	 * del localStorage, si hay user en el localStorage le pasamos los datos
 	 * del usuario, y si no, iniciamos el estado en null.
 	 */
-	const [user, setUser] = useState(() => {
-		const storedUser = localStorage.getItem('user');
-		return storedUser ? JSON.parse(storedUser) : null;
-	});
+	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
+
+	// Efecto que se ejecuta al montar la aplicación para verificar el token si existe
+	useEffect(() => {
+		const initAuth = async () => {
+			const token = localStorage.getItem('token');
+			if (token) {
+				try {
+					// Verificamos el token con el backend para obtener datos frescos
+					const userData = await authService.verifyToken(token);
+					setUser(userData);
+				} catch (error) {
+					console.error('El token expiró o es inválido en initAuth:', error.message);
+					localStorage.removeItem('token');
+					setUser(null);
+				}
+			}
+			setLoading(false);
+		};
+
+		initAuth();
+	}, []);
 
 	/**
 	 * Función para iniciar sesión.
-	 * Actualiza el estado y guarda el usuario en localStorage.
+	 * Recibe el TOKEN generado por PHP, y lo usamos para obtener 
+	 * de inmediato los datos de usuario y dejarlo guardado.
 	 */
-	const login = (userData) => {
-		setUser(userData);
-		localStorage.setItem('user', JSON.stringify(userData));
+	const login = async (token) => {
+		localStorage.setItem('token', token);
+		try {
+			// Aunque el login ya fue exitoso, aprovechamos verifyToken para tener los datos del usuario en el state de forma normalizada
+			const userData = await authService.verifyToken(token);
+			setUser(userData);
+		} catch (error) {
+			console.error("Error validando el token recién creado en login:", error.message);
+		}
 	};
 
 	/**
 	 * Función para cerrar sesión.
-	 * Limpia el estado y elimina el usuario de localStorage.
+	 * Limpia el estado y elimina el TOKEN de localStorage.
 	 */
 	const logout = () => {
 		setUser(null);
-		localStorage.removeItem('user');
+		localStorage.removeItem('token');
 	};
+
+	// Mientras verificamos el token inicial, no renderizamos las rutas protegidas
+	// si así lo prefieres, o simplemente dejamos pasar con user null por un milisegundo.
+	if (loading) {
+		return <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white' }}>Cargando sesión...</div>;
+	}
 
 	return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
 };

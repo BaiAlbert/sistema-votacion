@@ -1,15 +1,15 @@
 CREATE TABLE `usuarios` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `dni` varchar(9) UNIQUE NOT NULL COMMENT 'Fundamental para verificar identidad real',
+  `dni` varchar(9) UNIQUE NOT NULL,
   `username` varchar(50) UNIQUE NOT NULL,
-  `password` varchar(255) NOT NULL COMMENT 'Debe ir hasheada (bcrypt/argon2)',
+  `password` varchar(255) NOT NULL COMMENT 'Hasheada con bcrypt',
   `nombre` varchar(50) NOT NULL,
   `apellidos` varchar(100) NOT NULL,
   `email` varchar(100) UNIQUE NOT NULL,
-  `num_telefono` varchar(9) UNIQUE NOT NULL,
+  `num_telefono` varchar(9) UNIQUE NOT NULL COMMENT 'Solo numeros españoles',
   `provincia` varchar(50) NOT NULL,
   `ciudad` varchar(50) NOT NULL,
-  `rol` varchar(20) NOT NULL DEFAULT 'votante' COMMENT 'votante, admin_empresa, admin_gobierno',
+  `rol` varchar(20) NOT NULL DEFAULT 'votante' COMMENT 'votante, admin_privado o admin_gobierno',
   `fecha_creacion` timestamp DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -50,7 +50,7 @@ CREATE TABLE `votos_anonimos` (
   `id_votacion` integer NOT NULL,
   `id_opcion` integer NOT NULL,
   `hash_integridad` varchar(255) UNIQUE COMMENT 'Hash generado por backend para verificar que el voto no fue manipulado en BBDD',
-  `fecha_voto` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Se puede guardar con menos precisión (solo hora) para evitar ataques de correlación de tiempo'
+  `fecha_voto` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX `censo_votaciones_index_0` ON `censo_votaciones` (`id_votacion`, `id_usuario`);

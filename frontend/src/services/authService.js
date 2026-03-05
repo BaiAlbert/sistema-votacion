@@ -12,7 +12,7 @@ export const authService = {
 	 *
 	 * @param {string} email - El correo electrónico del usuario.
 	 * @param {string} password - La contraseña del usuario.
-	 * @returns {Promise<Object>} - Promesa que devuelve el objeto usuario si el login es exitoso.
+	 * @returns {Promise<string>} - Promesa que devuelve el Token JWT si el login es exitoso.
 	 * @throws {Error} - Lanza un error si las credenciales son incorrectas o falla la conexión.
 	 */
 	async login(email, password) {
@@ -30,6 +30,31 @@ export const authService = {
 		// Si la respuesta no es OK (ej. 401 o 500), lanzamos un error
 		if (!response.ok) {
 			throw new Error(data.error || 'Error en el login');
+		}
+
+		return data.token; // Ahora devolvemos el token, no el user
+	},
+
+	/**
+	 * Verifica si un token es válido y obtiene los datos más recientes del usuario,
+	 * incluyendo por ejemplo si le acaban de cambiar el rol a admin.
+	 * 
+	 * @param {string} token 
+	 * @returns {Promise<Object>} - El objeto con los datos frescos del usuario
+	 */
+	async verifyToken(token) {
+		const response = await fetch(`${API_URL}/verify.php`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ token }),
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			throw new Error(data.error || 'Token inválido');
 		}
 
 		return data.user;

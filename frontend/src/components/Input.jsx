@@ -10,8 +10,9 @@ import { motion } from 'motion/react';
  * @param {function} [props.onChange]
  * @param {Object} [props.estiloExtra]
  * @param {boolean} [props.isInvalid] - Determina si el input tiene un error de validación actual
+ * @param {string|number} [props.value] - Valor del input para componentes controlados
  */
-export function Input({ name, type, placeholder, maxLength, onChange, estiloExtra, isInvalid }) {
+export function Input({ name, type, placeholder, maxLength, onChange, estiloExtra, isInvalid, value }) {
 	const estiloInput = {
 		display: 'block',
 		width: '100%',
@@ -31,6 +32,7 @@ export function Input({ name, type, placeholder, maxLength, onChange, estiloExtr
 			placeholder={placeholder}
 			maxLength={maxLength}
 			onChange={onChange}
+			value={value}
 			required
 			style={estiloExtra ? { ...estiloInput, ...estiloExtra } : estiloInput}
 			animate={

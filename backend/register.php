@@ -13,10 +13,16 @@
  */
 include_once 'config/db.php';
 
-// Headers CORS
+// Configuración CORS y Preflight (Options) (ya explicado en login.php)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 // Leer el input JSON
 $input = json_decode(file_get_contents('php://input'), true);
@@ -43,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provincia = $input['provincia'] ?? '';
     $ciudad = $input['ciudad'] ?? '';
 
-    // Obtener límites de caracteres dinámicamente desde la base de datos
+    // Obtenemos los límites de caracteres dinámicamente desde la base de datos
     // $db viene incluido desde config/db.php
     $limites_stmt = $conexion->prepare("SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'usuarios'");
     $limites_stmt->execute([$db]);
