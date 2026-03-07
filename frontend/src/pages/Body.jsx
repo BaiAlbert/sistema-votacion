@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
 import { AnimatePresence } from 'motion/react';
 import AdminArea from './AdminArea';
+import ActiveVotings from './ActiveVotings';
 
 export function Body() {
 	const navigate = useNavigate();
@@ -41,7 +42,13 @@ export function Body() {
 							{activeComponent === 'adminArea' ? 'Cerrar Panel de creación' : 'Crear Votación'}
 						</Button>
 					) : (
-						<Button width="100%" secondary estiloExtra={{ marginTop: '1rem', opacity: 0.5, cursor: 'not-allowed' }} title="Requiere permisos de administrador" onClick={(e) => e.preventDefault()}>
+						<Button
+							width="100%"
+							secondary
+							disabled
+							estiloExtra={{ marginTop: '1rem' }}
+							title="Requiere permisos de administrador"
+						>
 							No disponible
 						</Button>
 					)}
@@ -51,8 +58,12 @@ export function Body() {
 					titulo="Explorar Votaciones"
 					descripcion="Descubre y participa en las votaciones activas a nivel nacional, autonómico o en tus organizaciones privadas."
 				>
-					<Button width="100%" estiloExtra={{ marginTop: '1rem' }}>
-						Votar Ahora
+					<Button
+						width="100%"
+						estiloExtra={{ marginTop: '1rem' }}
+						onClick={() => setActiveComponent(activeComponent === 'activeVotings' ? null : 'activeVotings')}
+					>
+						{activeComponent === 'activeVotings' ? 'Cerrar Panel de Votación' : 'Votar Ahora'}
 					</Button>
 				</Card>
 
@@ -69,12 +80,22 @@ export function Body() {
 			{/* Renderizado Dinámico de Componentes */}
 			<AnimatePresence mode="wait">
 				{activeComponent === 'adminArea' && (
-					<div key="adminArea" style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
+					<div
+						key="adminArea"
+						style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}
+					>
 						<AdminArea />
 					</div>
 				)}
+				{activeComponent === 'activeVotings' && (
+					<div
+						key="activeVotings"
+						style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}
+					>
+						<ActiveVotings />
+					</div>
+				)}
 			</AnimatePresence>
-
 		</main>
 	);
 }
@@ -100,9 +121,7 @@ function Section({ titulo, children }) {
 	return (
 		<section style={{ width: '100%' }}>
 			<h2 style={estiloBodySectionH2}>{titulo}</h2>
-			<div style={estiloBodySectionDiv}>
-				{children}
-			</div>
+			<div style={estiloBodySectionDiv}>{children}</div>
 		</section>
 	);
 }
@@ -121,20 +140,20 @@ function Card({ titulo, descripcion, children }) {
 		transition: 'transform 0.2s ease',
 		display: 'flex',
 		flexDirection: 'column',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
 	};
 
 	return (
-		<div style={estiloBodyCard} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+		<div
+			style={estiloBodyCard}
+			onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-5px)')}
+			onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+		>
 			<div>
 				<h3 style={{ marginTop: 0, color: '#38bdf8' }}>{titulo}</h3>
-				<p style={{ opacity: 0.8, fontSize: '0.95rem', lineHeight: '1.5' }}>
-					{descripcion}
-				</p>
+				<p style={{ opacity: 0.8, fontSize: '0.95rem', lineHeight: '1.5' }}>{descripcion}</p>
 			</div>
-			<div style={{ marginTop: 'auto' }}>
-				{children}
-			</div>
+			<div style={{ marginTop: 'auto' }}>{children}</div>
 		</div>
 	);
 }
