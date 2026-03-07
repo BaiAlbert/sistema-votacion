@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { authService } from '../services/authService';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import { Alert } from '../components/Alert';
 
 /**
  * Componente de Página de Registro
@@ -61,6 +62,7 @@ function Register() {
 		// Comprobación de integridad asignando el campo con error
 		if (!dniRegex.test(formData.dni)) {
 			setInvalidField('dni');
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 			return setError('El DNI debe tener 8 números y una letra.');
 		}
 		if (formData.nombre && !textRegex.test(formData.nombre)) {
@@ -81,6 +83,7 @@ function Register() {
 		}
 		if (formData.num_telefono && !phoneRegex.test(formData.num_telefono)) {
 			setInvalidField('num_telefono');
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 			return setError('El teléfono debe tener exactamente 9 números.');
 		}
 
@@ -92,6 +95,7 @@ function Register() {
 			// Si es exitoso, redirigimos al login para que el usuario entre
 			navigate('/login');
 		} catch (err) {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 			setError(err.message || 'Error de conexión con el servidor');
 		}
 	};
@@ -128,7 +132,7 @@ function Register() {
 		>
 			<div style={cardStyle}>
 				<h2 style={{ textAlign: 'center', marginBottom: '1.2rem' }}>Registro</h2>
-				{error && <p style={{ color: '#ff6b6b', textAlign: 'center', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>{error}</p>}
+				<Alert type="error" message={error} />
 				{/* Usamos CSS grid para organizar los inputs en dos columnas */}
 				<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
 					<Input

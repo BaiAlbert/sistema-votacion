@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import { Alert } from '../components/Alert';
 
 /**
  * Componente de Página de Inicio de Sesión
@@ -38,6 +39,7 @@ function Login() {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
 			setInvalidField('email');
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 			return setError('El formato del correo electrónico es inválido.');
 		}
 
@@ -52,6 +54,7 @@ function Login() {
 			navigate('/');
 		} catch (err) {
 			// Si falla, mostramos el error
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 			setError(err.message || 'Error al conectar con el servidor');
 		}
 	};
@@ -66,7 +69,7 @@ function Login() {
 		color: '#f8fafc',
 		maxWidth: '400px',
 		width: '100%',
-		// Removed margin: '150px auto',
+		// Eliminado: margin: '150px auto',
 		boxSizing: 'border-box',
 	};
 
@@ -89,7 +92,7 @@ function Login() {
 			<div style={estiloLoginCard}>
 				<h2 style={{ textAlign: 'center', marginBottom: '1.2rem' }}>Iniciar Sesión</h2>
 
-				{error && <p style={{ color: '#ff6b6b', textAlign: 'center', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>{error}</p>}
+				<Alert type="error" message={error} />
 
 				<form onSubmit={handleSubmit}>
 					<Input

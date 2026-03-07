@@ -11,18 +11,19 @@
  * @method POST
  * @package API
  */
-include_once 'config/db.php';
 
-// Configuración CORS y Preflight (Options) (ya explicado en login.php)
+// CONFIGURACIÓN CORS (Debe ir lo primerísimo)
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+    exit(0);
 }
+
+// CONEXIÓN A BASE DE DATOS Y DEPENDENCIAS
+include_once 'config/db.php';
 
 // Leer el input JSON
 $input = json_decode(file_get_contents('php://input'), true);
@@ -36,11 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $username = $input['username'];
+    
     // Hasheamos la contraseña usando el algoritmo por defecto (actualmente bcrypt)
-    // Esto es esencial para la seguridad ya que nunca debemos guardar contraseñas en texto plano.
+    // Esto es esencial para la seguridad, ya que nunca debemos guardar 
+    // contraseñas en texto plano en la base de datos (por si hay una filtración).
     $password = password_hash($input['password'], PASSWORD_DEFAULT);
 
-    // Recogemos el resto de campos
+    // Recogemos el resto de campos (usamos el operador "??" para asignar 
+    // un string vacío si la clave no viene en el JSON enviado desde el frontend)
     $dni = $input['dni'];
     $nombre = $input['nombre'] ?? '';
     $apellidos = $input['apellidos'] ?? '';
@@ -49,10 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provincia = $input['provincia'] ?? '';
     $ciudad = $input['ciudad'] ?? '';
 
-    // Obtenemos los límites de caracteres dinámicamente desde la base de datos
-    // $db viene incluido desde config/db.php
+    // Obtenemos los límites de caracteres dinámicamente desde la base de datos para no "harcodear"
+    // Esto significa que si luego cambiamos el VARCHAR en MySQL, el PHP se adaptará solo.
+    // $db (nombre de la base de datos) viene incluido desde config/db.php
     $limites_stmt = $conexion->prepare("SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'usuarios'");
     $limites_stmt->execute([$db]);
+
+    // Volcamos los límites en un array donde la Clave es el nombre de la columna y el Valor es el límite numérico
     $limites = $limites_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $max_username = $limites['username'] ?? 50;
@@ -146,14 +153,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Preparamos la sentencia SQL INSERT
-    // Usamos signos de interrogación (?) como marcadores para prevenir inyección SQL
+    // Preparamos la sentencia SQL INSERT de Inserción de Datos a la BD
+    // IMPORTANTISIMO: Usamos signos de interrogación (?) como marcadores.
+    // En lugar de concatenar el string, le pasamos los datos a PDO en la ejecución.
+    // Esta es la barrera defensiva número uno contra Inyecciones SQL (SQLi).
     $sql = "INSERT INTO usuarios (dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     try {
         $stmt = $conexion->prepare($sql);
-        // Ejecutamos la consulta
+        // Ejecutamos la consulta, PDO reemplaza los "?" con los valores de este array de forma segura
         if ($stmt->execute([$dni, $username, $password, $nombre, $apellidos, $email, $num_telefono, $provincia, $ciudad])) {
             echo json_encode(["message" => "Usuario registrado con éxito"]);
         }

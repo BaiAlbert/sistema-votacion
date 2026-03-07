@@ -39,7 +39,7 @@ export function Input({ name, type, placeholder, maxLength, onChange, estiloExtr
 				isInvalid
 					? {
 						backgroundColor: ['rgba(239, 68, 68, 0.4)', 'rgba(239, 68, 68, 0.1)'], // Flash rojo brillante -> fondo rojo suave
-						borderColor: ['rgba(239, 68, 68, 1)', 'rgba(239, 68, 68, 0.5)'],
+						borderColor: ['rgba(239, 68, 68, 1)', 'rgba(239, 68, 68, 0.5)'], // Borde rojo brillante -> borde rojo suave
 						x: [-5, 5, -5, 5, 0], // Pequeño temblor (shake) para avisar de error
 					}
 					: {

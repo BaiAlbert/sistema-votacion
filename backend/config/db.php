@@ -32,6 +32,8 @@ try {
     ];
     $conexion = new PDO($dsn, $user, $pass, $opciones);
 } catch (PDOException $e) {
+    // Establecemos código 500 para que el frontend (fetch) sepa que response.ok es falso
+    http_response_code(500);
     // Devolvemos JSON con el error y matamos el proceso para que no siga
     die(json_encode(["error" => "Error de conexión: " . $e->getMessage()]));
 }
