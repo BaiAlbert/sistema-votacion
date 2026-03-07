@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'framer-motion';
 import AdminArea from './AdminArea';
 import ActiveVotings from './ActiveVotings';
+import VotingsHistory from './VotingsHistory';
 
 export function Body() {
-	const navigate = useNavigate();
 	const { user } = useAuth();
 	const [activeComponent, setActiveComponent] = useState(null);
 
@@ -71,8 +70,15 @@ export function Body() {
 					titulo="Mis Votos e Historial"
 					descripcion="Revisa el registro encriptado de tus participaciones y visualiza los resultados de votaciones cerradas."
 				>
-					<Button width="100%" secondary estiloExtra={{ marginTop: '1rem' }}>
-						Ver Historial
+					<Button
+						width="100%"
+						secondary
+						estiloExtra={{ marginTop: '1rem' }}
+						onClick={() =>
+							setActiveComponent(activeComponent === 'votingsHistory' ? null : 'votingsHistory')
+						}
+					>
+						{activeComponent === 'votingsHistory' ? 'Cerrar Historial' : 'Ver Historial'}
 					</Button>
 				</Card>
 			</Section>
@@ -93,6 +99,14 @@ export function Body() {
 						style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}
 					>
 						<ActiveVotings />
+					</div>
+				)}
+				{activeComponent === 'votingsHistory' && (
+					<div
+						key="votingsHistory"
+						style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}
+					>
+						<VotingsHistory />
 					</div>
 				)}
 			</AnimatePresence>

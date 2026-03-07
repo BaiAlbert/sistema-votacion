@@ -3,6 +3,7 @@ services:
     image: mysql:8.0.45-debian
     container_name: votacion_db
     restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_es_0900_ai_ci --skip-character-set-client-handshake
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_appvotaciones

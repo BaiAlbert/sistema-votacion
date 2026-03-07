@@ -1,3 +1,5 @@
+USE db_appvotaciones;
+
 -- 1. TABLA: usuarios
 -- Almacena la información de los votantes y administradores en el sistema.
 CREATE TABLE `usuarios` (
@@ -13,7 +15,7 @@ CREATE TABLE `usuarios` (
   `ciudad` varchar(50) NOT NULL,
   `rol` varchar(20) NOT NULL DEFAULT 'votante' COMMENT 'votante, admin_privado o admin_gobierno',
   `fecha_creacion` timestamp DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 
 -- 2. TABLA: grupos
@@ -24,7 +26,7 @@ CREATE TABLE `grupos` (
   `nombre` varchar(100) NOT NULL,
   `descripcion` text,
   `fecha_creacion` timestamp DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 
 -- 3. TABLA: usuarios_grupos (Relación N a M)
@@ -44,7 +46,7 @@ CREATE TABLE `usuarios_grupos` (
   PRIMARY KEY (`id_usuario`, `id_grupo`),
   FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_grupo`) REFERENCES `grupos` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 
 -- 4. TABLA: votaciones
@@ -78,7 +80,7 @@ CREATE TABLE `votaciones` (
   
   FOREIGN KEY (`id_autor`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_grupo`) REFERENCES `grupos` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 
 -- 5. TABLA: opciones
@@ -89,7 +91,7 @@ CREATE TABLE `opciones` (
   `nombre_opcion` varchar(100) NOT NULL,
   `desc_opcion` text,
   FOREIGN KEY (`id_votacion`) REFERENCES `votaciones` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 
 -- SISTEMA DE ANONIMATO E INTEGRIDAD
@@ -108,7 +110,7 @@ CREATE TABLE `votos_registrados` (
   UNIQUE (`id_votacion`, `id_usuario`),
   FOREIGN KEY (`id_votacion`) REFERENCES `votaciones` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 -- 7. TABLA: votos_anonimos (La Urna - Qué se ha votado)
 -- Almacena las "papeletas" introducidas en la votación. Es imposible relacionar 
@@ -121,4 +123,4 @@ CREATE TABLE `votos_anonimos` (
   `fecha_voto` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`id_votacion`) REFERENCES `votaciones` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_opcion`) REFERENCES `opciones` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;

@@ -4,7 +4,8 @@
 CREATE USER IF NOT EXISTS 'user_appvotaciones'@'localhost' IDENTIFIED BY '123456';
 
 -- 2. Crear la base de datos
-CREATE DATABASE IF NOT EXISTS db_appvotaciones;
+CREATE DATABASE IF NOT EXISTS db_appvotaciones CHARACTER SET utf8mb4 COLLATE utf8mb4_es_0900_ai_ci;
+ALTER DATABASE db_appvotaciones CHARACTER SET utf8mb4 COLLATE utf8mb4_es_0900_ai_ci;
 
 -- 3. Conceder privilegios DML (Data Manipulation Language) sobre la base de datos de la aplicación
 -- Esto permite a la aplicación leer, insertar, actualizar y borrar datos de tu base de datos.

@@ -107,4 +107,27 @@ export const votacionesService = {
 
 		return data;
 	},
+
+	/**
+	 * Obtiene todas las votaciones FINALIZADAS en las que el usuario actual
+	 * tiene derecho a participar e incluye el total de votos por cada opción de forma anónima.
+	 *
+	 * @returns {Promise<Array>} Lista estructurada de Votaciones Históricas con conteos
+	 */
+	async getHistorialVotaciones() {
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error('No hay token de sesión.');
+
+		const response = await fetch(`${API_URL}/get_votaciones_historial.php`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		const data = await response.json();
+		if (!response.ok) throw new Error(data.error || 'Error fetching historical votings');
+
+		return data.votaciones || [];
+	},
 };
