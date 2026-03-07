@@ -68,10 +68,11 @@ export const AuthProvider = ({ children }) => {
 		localStorage.removeItem('token');
 	};
 
-	// Mientras verificamos el token inicial, no renderizamos las rutas protegidas
-	// si así lo prefieres, o simplemente dejamos pasar con user null por un milisegundo.
+	// Mientras verificamos el token inicial, no renderizamos las rutas para evitar
+	// que componentes protegidos se carguen antes de tener el usuario,
+	// pero devolvemos null para evitar un "pantallazo" brusco de carga.
 	if (loading) {
-		return <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white' }}>Cargando sesión...</div>;
+		return null;
 	}
 
 	return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;

@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { votacionesService } from '../services/votacionesService';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { Header } from '../components/Header';
 import { Select } from '../components/Select';
 import { Alert } from '../components/Alert';
 import { DatePicker } from '../components/DatePicker';
@@ -228,198 +227,196 @@ function AdminArea() {
     };
 
     return (
-        <>
-            <Header titulo="Sistema de Votación"></Header>
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight: '100vh',
-                    boxSizing: 'border-box',
-                    width: '100%',
-                    padding: '100px 1rem 1rem 1rem', // padding superior por el Header
-                }}
-            >
-                <div style={cardStyle}>
-                    <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#38bdf8' }}>Panel de Administración</h2>
-                    <h3 style={{ textAlign: 'center', marginBottom: '1.2rem', fontWeight: 'normal' }}>Crear Nueva Votación</h3>
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                boxSizing: 'border-box',
+                width: '100%',
+                marginTop: '1rem'
+            }}
+        >
+            <div style={cardStyle}>
+                <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#38bdf8' }}>Panel de Administración</h2>
+                <h3 style={{ textAlign: 'center', marginBottom: '1.2rem', fontWeight: 'normal' }}>Crear Nueva Votación</h3>
 
-                    <Alert type="error" message={error} />
-                    <Alert type="success" message={successMsg} />
+                <Alert type="error" message={error} />
+                <Alert type="success" message={successMsg} />
 
-                    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                        <Input
-                            name="titulo"
-                            type="text"
-                            placeholder="Título de la Votación"
-                            onChange={handleChange}
-                            isInvalid={invalidField === 'titulo'}
-                            value={formData.titulo}
-                        />
+                <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                    <Input
+                        name="titulo"
+                        type="text"
+                        placeholder="Título de la Votación"
+                        onChange={handleChange}
+                        isInvalid={invalidField === 'titulo'}
+                        value={formData.titulo}
+                    />
 
-                        <textarea
-                            name="descripcion"
-                            placeholder="Descripción (opcional)"
-                            onChange={handleChange}
-                            value={formData.descripcion}
-                            style={{ ...selectStyle, resize: 'vertical', minHeight: '100px' }}
-                        />
+                    <Input
+                        as="textarea"
+                        name="descripcion"
+                        placeholder="Descripción (opcional)"
+                        onChange={handleChange}
+                        value={formData.descripcion}
+                        estiloExtra={{ resize: 'vertical', minHeight: '100px', fontFamily: 'inherit' }}
+                    />
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Fecha de inicio:</label>
-                                <DatePicker
-                                    name="fecha_inicio"
-                                    onChange={handleChange}
-                                    value={formData.fecha_inicio}
-                                    isInvalid={invalidField === 'fecha_inicio'}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Fecha de fin:</label>
-                                <DatePicker
-                                    name="fecha_final"
-                                    onChange={handleChange}
-                                    value={formData.fecha_final}
-                                    isInvalid={invalidField === 'fecha_final'}
-                                />
-                            </div>
-                        </div>
-
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Tipo de Votación:</label>
-                            <Select
-                                name="tipo"
-                                value={formData.tipo}
-                                options={[
-                                    { value: 'gubernamental', label: 'Gubernamental' },
-                                    { value: 'privada', label: 'Privada' }
-                                ]}
-                                disabled // Forzamos el lock basado en el rol inicial
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Fecha de inicio:</label>
+                            <DatePicker
+                                name="fecha_inicio"
+                                onChange={handleChange}
+                                value={formData.fecha_inicio}
+                                isInvalid={invalidField === 'fecha_inicio'}
                             />
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '-0.3rem', marginBottom: '1rem' }}>* El tipo de votación está bloqueado según tu rol de administrador.</p>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Fecha de fin:</label>
+                            <DatePicker
+                                name="fecha_final"
+                                onChange={handleChange}
+                                value={formData.fecha_final}
+                                isInvalid={invalidField === 'fecha_final'}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Tipo de Votación:</label>
+                        <Select
+                            name="tipo"
+                            value={formData.tipo}
+                            options={[
+                                { value: 'gubernamental', label: 'Gubernamental' },
+                                { value: 'privada', label: 'Privada' }
+                            ]}
+                            disabled // Forzamos el lock basado en el rol inicial
+                        />
+                        <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '-0.3rem', marginBottom: '1rem' }}>* El tipo de votación está bloqueado según tu rol de administrador.</p>
+                    </div>
+
+                    {formData.tipo === 'gubernamental' && (
+                        <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#38bdf8' }}>Configuración Gubernamental</label>
+
+                            <label style={{ display: 'block', marginBottom: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Alcance de la Votación:</label>
+                            <Select
+                                name="alcance"
+                                onChange={handleChange}
+                                value={formData.alcance}
+                                options={[
+                                    { value: 'nacional', label: 'Nacional' },
+                                    { value: 'provincial', label: 'Provincial' },
+                                    { value: 'local', label: 'Local' }
+                                ]}
+                            />
+
+                            {(formData.alcance === 'provincial' || formData.alcance === 'local') && (
+                                <div style={{ marginTop: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Provincia Objetivo:</label>
+                                    <Input
+                                        name="provincia_target"
+                                        type="text"
+                                        placeholder="Ej: Madrid, Valencia..."
+                                        onChange={handleChange}
+                                        isInvalid={invalidField === 'provincia_target'}
+                                        value={formData.provincia_target}
+                                    />
+                                </div>
+                            )}
+
+                            {formData.alcance === 'local' && (
+                                <div style={{ marginTop: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Ciudad Objetivo:</label>
+                                    <Input
+                                        name="ciudad_target"
+                                        type="text"
+                                        placeholder="Ej: Móstoles, Gandía..."
+                                        onChange={handleChange}
+                                        isInvalid={invalidField === 'ciudad_target'}
+                                        value={formData.ciudad_target}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {formData.tipo === 'privada' && (
+                        <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#38bdf8' }}>Configuración Privada</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Grupo Organizador:</label>
+                            <Select
+                                name="id_grupo"
+                                value={formData.id_grupo}
+                                onChange={handleChange}
+                                options={[
+                                    ...adminGroups.map(g => ({ value: g.id.toString(), label: g.nombre }))
+                                ]}
+                            />
+                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.5rem' }}>* Solo puedes organizar votaciones para los grupos que administras.</p>
+                        </div>
+                    )}
+
+                    <div style={{ marginTop: '1.5rem', padding: '1.5rem', backgroundColor: 'rgba(15, 23, 42, 0.4)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', fontSize: '1rem', color: '#38bdf8', fontWeight: 'bold' }}>Opciones de Votación</label>
+                            <button type="button" onClick={handleAddOption} style={{ background: 'transparent', border: '1px dashed rgba(255,255,255,0.3)', color: 'white', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.2s' }} onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'} onMouseOut={(e) => e.target.style.background = 'transparent'}>
+                                + Añadir Opción
+                            </button>
                         </div>
 
-                        {formData.tipo === 'gubernamental' && (
-                            <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#38bdf8' }}>Configuración Gubernamental</label>
+                        {formData.opciones.map((opcion, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                style={{ display: 'flex', gap: '10px', marginBottom: '1rem', alignItems: 'flex-start', position: 'relative', padding: '15px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: invalidField === `opcion_${index}` ? '1px solid #ff6b6b' : '1px solid transparent' }}
+                            >
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <Input
+                                        type="text"
+                                        placeholder={`Título de la Opción ${index + 1}`}
+                                        value={opcion.nombre_opcion}
+                                        onChange={(e) => handleOptionChange(index, 'nombre_opcion', e.target.value)}
+                                        style={{ margin: 0 }}
+                                    />
+                                    <Input
+                                        as="textarea"
+                                        placeholder="Detalles sobre esta opción (Opcional)"
+                                        value={opcion.desc_opcion}
+                                        onChange={(e) => handleOptionChange(index, 'desc_opcion', e.target.value)}
+                                        estiloExtra={{ resize: 'vertical', minHeight: '60px', margin: 0, fontSize: '0.9rem', fontFamily: 'inherit' }}
+                                    />
+                                </div>
 
-                                <label style={{ display: 'block', marginBottom: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Alcance de la Votación:</label>
-                                <Select
-                                    name="alcance"
-                                    onChange={handleChange}
-                                    value={formData.alcance}
-                                    options={[
-                                        { value: 'nacional', label: 'Nacional' },
-                                        { value: 'provincial', label: 'Provincial' },
-                                        { value: 'local', label: 'Local' }
-                                    ]}
-                                />
-
-                                {(formData.alcance === 'provincial' || formData.alcance === 'local') && (
-                                    <div style={{ marginTop: '1rem' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Provincia Objetivo:</label>
-                                        <Input
-                                            name="provincia_target"
-                                            type="text"
-                                            placeholder="Ej: Madrid, Valencia..."
-                                            onChange={handleChange}
-                                            isInvalid={invalidField === 'provincia_target'}
-                                            value={formData.provincia_target}
-                                        />
-                                    </div>
+                                {formData.opciones.length > 2 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveOption(index)}
+                                        style={{ background: 'rgba(255,107,107,0.1)', border: '1px solid rgba(255,107,107,0.3)', color: '#ff6b6b', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0, padding: 0, transition: 'all 0.2s', alignSelf: 'flex-start' }}
+                                        title="Eliminar opción"
+                                    >
+                                        <span style={{ marginTop: '-2px', fontWeight: 'bold' }}>×</span>
+                                    </button>
                                 )}
+                            </motion.div>
+                        ))}
+                    </div>
 
-                                {formData.alcance === 'local' && (
-                                    <div style={{ marginTop: '1rem' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Ciudad Objetivo:</label>
-                                        <Input
-                                            name="ciudad_target"
-                                            type="text"
-                                            placeholder="Ej: Móstoles, Gandía..."
-                                            onChange={handleChange}
-                                            isInvalid={invalidField === 'ciudad_target'}
-                                            value={formData.ciudad_target}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {formData.tipo === 'privada' && (
-                            <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#38bdf8' }}>Configuración Privada</label>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Grupo Organizador:</label>
-                                <Select
-                                    name="id_grupo"
-                                    value={formData.id_grupo}
-                                    onChange={handleChange}
-                                    options={[
-                                        ...adminGroups.map(g => ({ value: g.id.toString(), label: g.nombre }))
-                                    ]}
-                                />
-                                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.5rem' }}>* Solo puedes organizar votaciones para los grupos que administras.</p>
-                            </div>
-                        )}
-
-                        <div style={{ marginTop: '1.5rem', padding: '1.5rem', backgroundColor: 'rgba(15, 23, 42, 0.4)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', fontSize: '1rem', color: '#38bdf8', fontWeight: 'bold' }}>Opciones de Votación</label>
-                                <button type="button" onClick={handleAddOption} style={{ background: 'transparent', border: '1px dashed rgba(255,255,255,0.3)', color: 'white', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.2s' }} onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'} onMouseOut={(e) => e.target.style.background = 'transparent'}>
-                                    + Añadir Opción
-                                </button>
-                            </div>
-
-                            {formData.opciones.map((opcion, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    style={{ display: 'flex', gap: '10px', marginBottom: '1rem', alignItems: 'flex-start', position: 'relative', padding: '15px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: invalidField === `opcion_${index}` ? '1px solid #ff6b6b' : '1px solid transparent' }}
-                                >
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <Input
-                                            type="text"
-                                            placeholder={`Título de la Opción ${index + 1}`}
-                                            value={opcion.nombre_opcion}
-                                            onChange={(e) => handleOptionChange(index, 'nombre_opcion', e.target.value)}
-                                            style={{ margin: 0 }}
-                                        />
-                                        <textarea
-                                            placeholder="Detalles sobre esta opción (Opcional)"
-                                            value={opcion.desc_opcion}
-                                            onChange={(e) => handleOptionChange(index, 'desc_opcion', e.target.value)}
-                                            style={{ ...selectStyle, resize: 'vertical', minHeight: '60px', margin: 0, fontSize: '0.9rem' }}
-                                        />
-                                    </div>
-
-                                    {formData.opciones.length > 2 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveOption(index)}
-                                            style={{ background: 'rgba(255,107,107,0.1)', border: '1px solid rgba(255,107,107,0.3)', color: '#ff6b6b', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0, padding: 0, transition: 'all 0.2s', alignSelf: 'flex-start' }}
-                                            title="Eliminar opción"
-                                        >
-                                            <span style={{ marginTop: '-2px', fontWeight: 'bold' }}>×</span>
-                                        </button>
-                                    )}
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        <Button type="submit" width="100%" estiloExtra={{ marginTop: '1rem' }}>
-                            Crear Votación
-                        </Button>
-                    </form>
-                </div>
-            </motion.div>
-        </>
+                    <Button type="submit" width="100%" estiloExtra={{ marginTop: '1rem' }}>
+                        Crear Votación
+                    </Button>
+                </form>
+            </div>
+        </motion.div>
     );
 }
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
 
 /**
@@ -11,27 +12,36 @@ import { motion } from 'motion/react';
  * @param {Object} [props.estiloExtra]
  * @param {boolean} [props.isInvalid] - Determina si el input tiene un error de validación actual
  * @param {string|number} [props.value] - Valor del input para componentes controlados
+ * @param {string} [props.as] - Etiqueta a usar (por defecto "input", permite "textarea")
  */
-export function Input({ name, type, placeholder, maxLength, onChange, estiloExtra, isInvalid, value }) {
+export function Input({ name, type, placeholder, maxLength, onChange, estiloExtra, isInvalid, value, as = "input" }) {
+	const [isFocused, setIsFocused] = useState(false);
+
 	const estiloInput = {
 		display: 'block',
 		width: '100%',
 		padding: '0.8rem',
 		marginBottom: '0.8rem',
 		borderRadius: '8px',
-		border: '1px solid rgba(255, 255, 255, 0.1)',
+		border: isFocused && !isInvalid ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
 		backgroundColor: 'rgba(15, 23, 42, 0.6)',
 		color: '#f8fafc',
 		boxSizing: 'border-box',
+		outline: 'none', // Removemos el outline azul por defecto del navegador para usar el nuestro
+		transition: 'border 0.3s ease',
 	};
 
+	const Component = as === "textarea" ? motion.textarea : motion.input;
+
 	return (
-		<motion.input
+		<Component
 			name={name}
 			type={type}
 			placeholder={placeholder}
 			maxLength={maxLength}
 			onChange={onChange}
+			onFocus={() => setIsFocused(true)}
+			onBlur={() => setIsFocused(false)}
 			value={value}
 			required
 			style={estiloExtra ? { ...estiloInput, ...estiloExtra } : estiloInput}
@@ -44,11 +54,11 @@ export function Input({ name, type, placeholder, maxLength, onChange, estiloExtr
 					}
 					: {
 						backgroundColor: 'rgba(15, 23, 42, 0.6)',
-						borderColor: 'rgba(255, 255, 255, 0.1)',
+						borderColor: isFocused ? 'rgba(56, 189, 248, 0.5)' : 'rgba(255, 255, 255, 0.1)',
 						x: 0,
 					}
 			}
-			transition={{ duration: 0.4 }}
+			transition={{ duration: 0.1 }}
 		/>
 	);
 }

@@ -1,6 +1,15 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
+import { AnimatePresence } from 'motion/react';
+import AdminArea from './AdminArea';
 
 export function Body() {
+	const navigate = useNavigate();
+	const { user } = useAuth();
+	const [activeComponent, setActiveComponent] = useState(null);
+
 	const estiloMainBody = {
 		paddingTop: '120px',
 		paddingBottom: '50px',
@@ -14,16 +23,63 @@ export function Body() {
 		cursor: 'default',
 	};
 
+	const isAdmin = user && (user.rol === 'admin_privado' || user.rol === 'admin_gobierno');
+
 	return (
 		<main style={estiloMainBody}>
-			<Section titulo="Votaciones en Curso (Pendientes de tu voto)" />
-			<Section titulo="Próximas Votaciones" />
-			<Section titulo="Votaciones Pasadas" />
+			<Section titulo="Panel Principal">
+				<Card
+					titulo="Crear Nueva Votación"
+					descripcion="Organiza y publica nuevas votaciones. Solo administradores autorizados."
+				>
+					{isAdmin ? (
+						<Button
+							width="100%"
+							estiloExtra={{ marginTop: '1rem' }}
+							onClick={() => setActiveComponent(activeComponent === 'adminArea' ? null : 'adminArea')}
+						>
+							{activeComponent === 'adminArea' ? 'Cerrar Panel de creación' : 'Crear Votación'}
+						</Button>
+					) : (
+						<Button width="100%" secondary estiloExtra={{ marginTop: '1rem', opacity: 0.5, cursor: 'not-allowed' }} title="Requiere permisos de administrador" onClick={(e) => e.preventDefault()}>
+							No disponible
+						</Button>
+					)}
+				</Card>
+
+				<Card
+					titulo="Explorar Votaciones"
+					descripcion="Descubre y participa en las votaciones activas a nivel nacional, autonómico o en tus organizaciones privadas."
+				>
+					<Button width="100%" estiloExtra={{ marginTop: '1rem' }}>
+						Votar Ahora
+					</Button>
+				</Card>
+
+				<Card
+					titulo="Mis Votos e Historial"
+					descripcion="Revisa el registro encriptado de tus participaciones y visualiza los resultados de votaciones cerradas."
+				>
+					<Button width="100%" secondary estiloExtra={{ marginTop: '1rem' }}>
+						Ver Historial
+					</Button>
+				</Card>
+			</Section>
+
+			{/* Renderizado Dinámico de Componentes */}
+			<AnimatePresence mode="wait">
+				{activeComponent === 'adminArea' && (
+					<div key="adminArea" style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
+						<AdminArea />
+					</div>
+				)}
+			</AnimatePresence>
+
 		</main>
 	);
 }
 
-function Section({ titulo }) {
+function Section({ titulo, children }) {
 	const estiloBodySectionH2 = {
 		color: 'white',
 		marginBottom: '1rem',
@@ -44,17 +100,14 @@ function Section({ titulo }) {
 	return (
 		<section style={{ width: '100%' }}>
 			<h2 style={estiloBodySectionH2}>{titulo}</h2>
-
 			<div style={estiloBodySectionDiv}>
-				<Card titulo="Tarjeta 1" />
-				<Card titulo="Tarjeta 2" />
-				<Card titulo="Tarjeta 3" />
+				{children}
 			</div>
 		</section>
 	);
 }
 
-function Card({ titulo }) {
+function Card({ titulo, descripcion, children }) {
 	const estiloBodyCard = {
 		flex: '1',
 		minWidth: '250px',
@@ -66,20 +119,22 @@ function Card({ titulo }) {
 		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
 		color: '#f8fafc',
 		transition: 'transform 0.2s ease',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'space-between'
 	};
 
 	return (
-		<div style={estiloBodyCard}>
-			<h3 style={{ marginTop: 0 }}>{titulo}</h3>
-
-			<p style={{ opacity: 0.8 }}>
-				Este texto esta aquí como ejemplo. Este texto esta aquí como ejemplo. Este texto esta aquí como ejemplo.
-				Este texto esta aquí como ejemplo.
-			</p>
-
-			<Button width="100%" estiloExtra={{ marginTop: '1rem' }}>
-				Ver más
-			</Button>
+		<div style={estiloBodyCard} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+			<div>
+				<h3 style={{ marginTop: 0, color: '#38bdf8' }}>{titulo}</h3>
+				<p style={{ opacity: 0.8, fontSize: '0.95rem', lineHeight: '1.5' }}>
+					{descripcion}
+				</p>
+			</div>
+			<div style={{ marginTop: 'auto' }}>
+				{children}
+			</div>
 		</div>
 	);
 }

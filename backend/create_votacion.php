@@ -14,9 +14,7 @@
  * @package API
  */
 
-// ==========================================
-// 1. CONFIGURACIÓN CORS (Debe ir lo primerísimo)
-// ==========================================
+// CONFIGURACIÓN CORS (Debe ir lo primerísimo)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -26,9 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// ==========================================
-// 2. CONEXIÓN A BASE DE DATOS Y DEPENDENCIAS
-// ==========================================
+// CONEXIÓN A BASE DE DATOS Y DEPENDENCIAS
 require 'vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
