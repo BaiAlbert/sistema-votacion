@@ -1,12 +1,26 @@
+# Partimos de tu imagen base
 FROM php:8.2-apache
 
-# Enable apache rewrite module
+# Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 
-# Install required PHP extensions for MySQL connection
+# Instalar extensiones PDO y MySQL
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-# Note: The codebase includes composer usage ("require vendor/autoload.php").
-# Assuming composer install has already been run locally during dev, 
-# or if not, you should add composer installation here.
-# Since volume mapping is used, the local 'vendor' folder is shared with the container.
+# Instalar Git y Unzip (necesarios para que Composer funcione bien)
+RUN apt-get update && apt-get install -y git unzip
+
+# Instalar Composer dentro de la imagen
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Establecer el directorio de trabajo
+WORKDIR /var/www/html
+
+# Copiar todo el código del backend al contenedor
+COPY . .
+
+# Instalar dependencias de PHP para producción
+RUN composer install --no-dev --optimize-autoloader
+
+# Dar permisos al usuario de Apache
+RUN chown -R www-data:www-data /var/www/html
