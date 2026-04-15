@@ -44,7 +44,7 @@ $userId = null;
 $userRole = null;
 
 try {
-    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS256'));
+    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS512'));
     $userId = $decoded->data->id ?? null;
     $userRole = $decoded->data->rol ?? null;
 } catch (Exception $e) {

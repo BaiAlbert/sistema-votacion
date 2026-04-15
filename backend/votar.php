@@ -43,7 +43,7 @@ $token = $matches[1];
 $userId = null;
 
 try {
-    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS256'));
+    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS512'));
     $userId = $decoded->data->id ?? null;
 } catch (Exception $e) {
     http_response_code(401);

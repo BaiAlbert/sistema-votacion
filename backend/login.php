@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Encriptamos el Token apuntando a la semilla secreta del servidor ($jwt_secret)
             // IMPORTANTE: $jwt_secret viene incluido mágicamente desde el archivo config/db.php
-            $jwt = JWT::encode($payload, $jwt_secret, 'HS256');
+            $jwt = JWT::encode($payload, $jwt_secret, 'HS512');
 
             // Devolvemos el Token al Frontend para que lo guarde en su LocalStorage
             echo json_encode([

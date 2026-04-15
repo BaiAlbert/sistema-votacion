@@ -48,7 +48,7 @@ $token = str_replace('Bearer ', '', $authHeader);
 
 try {
     // Verificamos si la firma criptográfica es auténtica usando el token $jwt_secret
-    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS256'));
+    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS512'));
     $userId = $decoded->data->id ?? null; // Sacamos el ID oculto dentro del Token
     $userRole = $decoded->data->rol ?? null; // Sacamos el Rol ocultado dentro del Token
 } catch (Exception $e) {

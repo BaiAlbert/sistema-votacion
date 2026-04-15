@@ -1,5 +1,5 @@
 # Partimos de tu imagen base
-FROM php:8.2-apache
+FROM php:8.5-apache
 
 # Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite

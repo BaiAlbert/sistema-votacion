@@ -19,8 +19,8 @@ $dotenv->safeLoad();
 $host = $_ENV['DB_HOST'];
 $db = $_ENV['DB_NAME'];
 $user = $_ENV['DB_USER'];
-$pass = $_ENV['DB_PASS'];
-$jwt_secret = $_ENV['JWT_SECRET'];
+$pass = file_exists('/run/secrets/db_password') ? trim(file_get_contents('/run/secrets/db_password')) : $_ENV['DB_PASS'];
+$jwt_secret = file_exists('/run/secrets/jwt_secret') ? trim(file_get_contents('/run/secrets/jwt_secret')) : $_ENV['JWT_SECRET'];
 
 // Creamos la conexión usando PDO
 try {

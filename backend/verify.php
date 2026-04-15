@@ -41,11 +41,11 @@ if (!$token) {
 
 try {
     // Intentamos decodificar el token usando nuestra clave secreta del servidor ($jwt_secret)
-    // El objeto Key asume que el token se generó con el algoritmo HS256.
+    // El objeto Key asume que el token se generó con el algoritmo HS512.
     // IMPORTANTE: Si un hacker altera un solo carácter del token desde el DevTools del navegador,
     // la firma criptográfica se romperá y la función decode() saltará al bloque "catch" de abajo.
     // También saltará al catch si ha pasado más del tiempo de vida (expirationTime) que configuramos en login.php.
-    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS256'));
+    $decoded = JWT::decode($token, new Key($jwt_secret, 'HS512'));
     
     // Si llegamos hasta aquí, el token es 100% auténtico y podemos confiar en la ID que lleva dentro.
     $userId = $decoded->data->id;
