@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000'; // Ajustar según el entorno (ej: variables de entorno)
+const API_URL = '/api'; // Ajustar según el entorno (ej: variables de entorno)
 
 /**
  * Servicio de Votaciones

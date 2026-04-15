@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000'; // Ajusta si es necesario
+const API_URL = '/api'; // Ajusta si es necesario
 
 /**
  * Servicio de Autenticación
@@ -38,8 +38,8 @@ export const authService = {
 	/**
 	 * Verifica si un token es válido y obtiene los datos más recientes del usuario,
 	 * incluyendo por ejemplo si le acaban de cambiar el rol a admin.
-	 * 
-	 * @param {string} token 
+	 *
+	 * @param {string} token
 	 * @returns {Promise<Object>} - El objeto con los datos frescos del usuario
 	 */
 	async verifyToken(token) {
