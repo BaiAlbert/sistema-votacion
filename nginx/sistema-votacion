@@ -51,4 +51,74 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
     }
+
+    # 5. Enrutar Netdata individualmente
+
+    # Netdata del manager
+    location /netdata-manager/ {
+        # Seguridad para que solo la ip publica de mi maquina manager pueda entrar
+        # allow TU_IP_PUBLICA;
+        # deny all;
+
+        rewrite ^/netdata-master(/(.*))$ /$2 break;
+
+        proxy_pass http://192.168.50.1:19999/;
+        proxy_set_header Host $host; 
+        proxy_set_header X-Real-IP $remote_addr;
+
+        proxy_http_version 1.1; 
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Netdata del nodo DB
+    location /netdata-db/ {
+        # Seguridad para que solo la ip publica de mi maquina manager pueda entrar
+        # allow TU_IP_PUBLICA;
+        # deny all;
+
+        rewrite ^/netdata-db(/(.*))$ /$2 break;
+
+        proxy_pass http://192.168.50.2:19999/;
+        proxy_set_header Host $host; 
+        proxy_set_header X-Real-IP $remote_addr;
+
+        proxy_http_version 1.1; 
+        proxy_set_header Upgrade $http_upgrade; 
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Netdata del worker 1
+    location /netdata-worker1/ {
+        # Seguridad para que solo la ip publica de mi maquina manager pueda entrar
+        # allow TU_IP_PUBLICA;
+        # deny all;
+
+        rewrite ^/netdata-w1(/(.*))$ /$2 break;
+
+        proxy_pass http://192.168.50.3:19999/;
+        proxy_set_header Host $host; 
+        proxy_set_header X-Real-IP $remote_addr;
+
+        proxy_http_version 1.1; 
+        proxy_set_header Upgrade $http_upgrade; 
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Netdata del worker 2
+    location /netdata-worker2/ {
+        # Seguridad para que solo la ip publica de mi maquina manager pueda entrar
+        # allow TU_IP_PUBLICA;
+        # deny all;
+
+        rewrite ^/netdata-w2(/(.*))$ /$2 break;
+
+        proxy_pass http://192.168.50.4:19999/;
+        proxy_set_header Host $host; 
+        proxy_set_header X-Real-IP $remote_addr;
+
+        proxy_http_version 1.1; 
+        proxy_set_header Upgrade $http_upgrade; 
+        proxy_set_header Connection "upgrade";
+    }
 }
