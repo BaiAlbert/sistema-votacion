@@ -23,6 +23,7 @@ if [ -d "$APP_DIR/.git" ]; then
     # Forzamos a que machaque cualquier cambio local y se quede con lo de GitHub
     git fetch --all
     git reset --hard origin/main
+    chmod +x setup/*.sh
 else
     echo "Clonando el repositorio en $APP_DIR..."
     git clone "$REPO_URL" "$APP_DIR"
@@ -88,8 +89,13 @@ echo "Compilando y subiendo el Frontend..."
 docker build -t $REGISTRY/votacion-frontend:latest ./frontend
 docker push $REGISTRY/votacion-frontend:latest
 
-# 7. Despliegue final en el clúster
+# 7. Añadir labels a los nodos para que los servicios sepan en que maquinas alojarse
+docker node update --label-add role=database servidor-db
+docker node update --label-add role=app servidor-worker1
+docker node update --label-add role=app servidor-worker2
+
+# 8. Despliegue final en el clúster
 echo "Desplegando el stack completo de la aplicación en nuestro swarm..."
-docker stack deploy -c docker-stack.yml app_votaciones
+docker stack deploy -c docker-compose.yml app_votaciones
 
 echo "La aplicación ha sido desplegada y está corriendo."
