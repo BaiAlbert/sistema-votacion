@@ -29,7 +29,25 @@ else
     cd "$APP_DIR"
 fi
 
-# 4. Configuración de Nginx
+# 4. Instalación y configuración de Nginx
+echo "Comprobando e instalando Nginx..."
+
+# Actualizamos la lista de paquetes
+# Usamos -qq para que sea silencioso y no llene la pantalla de texto basura
+apt-get update -qq
+
+# Instalamos Nginx. La bandera -y es CRUCIAL para que no pregunte "Do you want to continue? [Y/n]"
+apt-get install -y nginx
+
+# Borramos la configuración por defecto de Nginx que viene de fábrica
+# Esto evita el clásico error de "el puerto 80 ya está en uso"
+rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-available/default
+
+# Nos aseguramos de que el servicio esté activado para que arranque si la máquina se reinicia
+systemctl enable nginx
+systemctl start nginx
+
 echo "Configurando Nginx..."
 # Copiamos usando rutas relativas (como ya hemos hecho 'cd', el archivo está justo aquí)
 cp -f nginx/sistema-votacion /etc/nginx/sites-available/sistema-votacion

@@ -9,26 +9,66 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+USUARIO="alberto-ramirez" 
+WORKERS=("192.168.50.2" "192.168.50.3" "192.168.50.4")
+
 echo "Iniciando el despliegue automático del archivo de repositorios locales (Registry)..."
 
-# 3. Primero debemos configurar Docker
-echo "Configurando Docker para permitir el registry inseguro en 192.168.50.1:5000..."
-# Creamos la carpeta por si es una instalación tan limpia que ni siquiera existe el directorio
-mkdir -p /etc/docker
-# Inyectamos la configuración
-echo "{ \"insecure-registries\" : [\"192.168.50.1:5000\"] }" > /etc/docker/daemon.json
+# 3. Comprobación interactiva del contenedor
+# Buscamos si ya existe un contenedor llamado exactamente "repositorios"
+if docker ps -a --format '{{.Names}}' | grep -Eq "^repositorios$"; then
+    echo ""
+    echo "Se ha encontrado un contenedor ya llamado 'repositorios'."
+    # Preguntamos qué hacer y guardamos la letra en la variable RESPUESTA
+    read -p "¿Quieres eliminarlo y crearlo de nuevo? (y/n): " RESPUESTA
+    
+    if [ "$RESPUESTA" = "y" ] || [ "$RESPUESTA" = "Y" ]; then
+        echo "Borrando el contenedor antiguo..."
+        docker rm -f repositorios
+    else
+        echo "Operación cancelada. El script se detendrá."
+        exit 0 # Salimos limpiamente sin dar error
+    fi
+fi
 
-# 4. Aplicamos los cambios
-echo "Reiniciando el servicio de Docker para que se aplique la nueva configuración..."
+# 4. Configurar Docker en el Manager local
+echo ""
+echo "Configurando Docker local para permitir el registry inseguro en 192.168.50.1:5000..."
+mkdir -p /etc/docker
+tee /etc/docker/daemon.json > /dev/null <<EOF
+{
+    "insecure-registries" : ["192.168.50.1:5000"]
+}
+EOF
+
+echo "Reiniciando el servicio de Docker local para aplicar cambios..."
 systemctl restart docker
 
-# 5. Limpieza previa (Idempotencia)
-# Si por error ejecutas este script dos veces, Docker daría error diciendo que el nombre "repositorios" ya existe.
-# Esta línea borra el contenedor antiguo en silencio (si existe) para que no haya conflictos.
-docker rm -f repositorios 2>/dev/null || true
+# 5. Inyectar la configuración en los Workers remotos por SSH
+echo ""
+echo "Enviando la configuración de Docker a los Workers remotos..."
+echo "ATENCIÓN: Te pedirá la contraseña de $USUARIO para el sudo en cada máquina."
 
-# 6. Lanzar el Registry
-echo "Desplegando el contenedor del Registry..."
+for IP in "${WORKERS[@]}"; do
+    echo " - Inyectando JSON y reiniciando Docker en $IP..."
+    
+    # Mandamos un bloque de comandos multilínea por SSH. 
+    # Usamos <<'REMOTE_EOF' para que el texto viaje tal cual y se procese en la otra máquina.
+    sudo -u $USUARIO ssh -t $USUARIO@$IP "
+        sudo mkdir -p /etc/docker &&
+        sudo tee /etc/docker/daemon.json > /dev/null <<'REMOTE_EOF'
+{
+    \"insecure-registries\" : [\"192.168.50.1:5000\"]
+}
+REMOTE_EOF
+        sudo systemctl restart docker
+    "
+done
+
+# 6. Lanzar el Registry local
+echo ""
+echo "Desplegando el contenedor del Registry en el Manager..."
 docker run -d -p 5000:5000 --restart=always --name repositorios registry:2
 
-echo "Registry local desplegado y listo para recibir builds en 192.168.50.1:5000"
+echo ""
+echo "Registry local desplegado y nodos configurados para permitir el registry en 192.168.50.1:5000"
