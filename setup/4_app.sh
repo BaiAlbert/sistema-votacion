@@ -78,8 +78,8 @@ fi
 
 # 6. Compilación y subida de imágenes
 echo "Compilando y subiendo la Base de Datos..."
-docker build -t $REGISTRY/votacion-db:latest ./database
-docker push $REGISTRY/votacion-db:latest
+docker build -t $REGISTRY/votacion-db-galera:latest ./database
+docker push $REGISTRY/votacion-db-galera:latest
 
 echo "Compilando y subiendo el Backend..."
 docker build -t $REGISTRY/votacion-backend:latest ./backend
