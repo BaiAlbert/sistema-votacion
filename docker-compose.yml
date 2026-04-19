@@ -17,7 +17,7 @@ services:
             MARIADB_PASSWORD_FILE: /run/secrets/db_password
             # El primer nodo arranca con gcomm:// (vacío) para crear el clúster
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
-            MARIADB_GALERA_MARIABACKUP_PASSWORD: /run/secrets/galera_sync_password
+            MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://
         secrets:
             - db_root_password
@@ -44,7 +44,7 @@ services:
             MARIADB_GALERA_CLUSTER_NAME: votacion_db_cluster
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
-            MARIADB_GALERA_MARIABACKUP_PASSWORD: /run/secrets/galera_sync_password
+            MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
             # Apunta al nodo 1 para unirse al clúster
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node3
         secrets:
@@ -73,7 +73,7 @@ services:
             MARIADB_GALERA_CLUSTER_NAME: votacion_db_cluster
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
-            MARIADB_GALERA_MARIABACKUP_PASSWORD: /run/secrets/galera_sync_password
+            MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
             # Apunta al nodo 1 para unirse al clúster
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2
         secrets:
@@ -154,6 +154,8 @@ secrets:
     db_root_password:
         external: true
     db_password:
+        external: true
+    galera_sync_password:
         external: true
     jwt_secret:
         external: true
