@@ -15,10 +15,11 @@ services:
             MARIADB_USER: user_appvotaciones
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_PASSWORD_FILE: /run/secrets/db_password
-            # El primer nodo arranca con gcomm:// (vacío) para crear el clúster
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
             MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
+            # Cambiar a gcomm://db-node1,db-node2,db-node3 una vez haya arrancado todo
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://
+            MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: 'yes'
         secrets:
             - db_root_password
             - db_password
@@ -45,8 +46,7 @@ services:
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
             MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
-            # Apunta al nodo 1 para unirse al clúster
-            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node3
+            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2,db-node3
         secrets:
             - db_root_password
             - galera_sync_password
@@ -74,8 +74,7 @@ services:
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
             MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
-            # Apunta al nodo 1 para unirse al clúster
-            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2
+            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2,db-node3
         secrets:
             - db_root_password
             - galera_sync_password
@@ -150,6 +149,62 @@ services:
                 constraints:
                     - node.labels.role == app
 
+    prometheus:
+        image: prom/prometheus:latest
+        volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+            - prometheus_data:/prometheus
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+        networks:
+            - votacion_net
+        deploy:
+            placement:
+                constraints:
+                    - node.role == manager
+
+    grafana:
+        image: grafana/grafana:latest
+        ports:
+            - '3001:3000'
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=tu_contraseña_segura
+        volumes:
+            - grafana_data:/var/lib/grafana
+        networks:
+            - votacion_net
+        deploy:
+            placement:
+                constraints:
+                    - node.role == manager
+
+    node-exporter:
+        image: prom/node-exporter:latest
+        volumes:
+            - /proc:/host/proc:ro
+            - /sys:/host/sys:ro
+            - /:/rootfs:ro
+        command:
+            - '--path.procfs=/host/proc'
+            - '--path.sysfs=/host/sys'
+        networks:
+            - votacion_net
+        deploy:
+            mode: global
+
+    cadvisor:
+        image: gcr.io/cadvisor/cadvisor:latest
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:rw
+            - /sys:/sys:ro
+            - /var/lib/docker/:/var/lib/docker:ro
+        networks:
+            - votacion_net
+        deploy:
+            mode: global
+
 secrets:
     db_root_password:
         external: true
@@ -168,3 +223,5 @@ volumes:
     db_data_1:
     db_data_2:
     db_data_3:
+    prometheus_data:
+    grafana_data:

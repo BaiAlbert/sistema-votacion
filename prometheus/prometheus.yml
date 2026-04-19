@@ -1,0 +1,25 @@
+global:
+    scrape_interval: 5s # Cada cuánto tiempo recoge datos
+    evaluation_interval: 5s
+
+scrape_configs:
+    # El propio Prometheus monitorizándose a sí mismo
+    - job_name: 'prometheus'
+      static_configs:
+          - targets: ['localhost:9090']
+
+    # Monitorización de las máquinas físicas (CPU, RAM, Disco de los workers y manager)
+    - job_name: 'node-exporter'
+      dns_sd_configs:
+          - names:
+                - 'tasks.node-exporter'
+            type: 'A'
+            port: 9100
+
+    # Monitorización de los contenedores de Docker
+    - job_name: 'cadvisor'
+      dns_sd_configs:
+          - names:
+                - 'tasks.cadvisor'
+            type: 'A'
+            port: 8080
