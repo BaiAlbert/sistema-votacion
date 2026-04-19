@@ -63,12 +63,17 @@ echo "Verificando secrets de Docker..."
 
 if ! docker secret ls | grep -qw "db_root_password"; then
     echo "Creando secreto db_root_password..."
-    openssl rand -base64 32 | docker secret create db_root_password -
+    openssl rand -base64 16 | docker secret create db_root_password -
 fi
 
 if ! docker secret ls | grep -qw "db_password"; then
     echo "Creando secreto db_password..."
-    openssl rand -base64 32 | docker secret create db_password -
+    openssl rand -base64 16 | docker secret create db_password -
+fi
+
+if ! docker secret ls | grep -qw "galera_sync_password"; then
+    echo "Creando secreto galera_sync_password..."
+    openssl rand -base64 16 | docker secret create galera_sync_password -
 fi
 
 if ! docker secret ls | grep -qw "jwt_secret"; then

@@ -4,7 +4,11 @@ services:
     # Nodo 1 de la base de datos: El inicializador del clúster galera
     db-node1:
         image: 192.168.50.1:5000/votacion-db-galera:latest
-        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_es_0900_ai_ci --skip-character-set-client-handshake
+        command:
+            - /opt/bitnami/scripts/mariadb-galera/run.sh
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_es_0900_ai_ci
+            - --skip-character-set-client-handshake
         environment:
             MARIADB_GALERA_CLUSTER_NAME: votacion_db_cluster
             MARIADB_DATABASE: db_appvotaciones
@@ -13,11 +17,12 @@ services:
             MARIADB_PASSWORD_FILE: /run/secrets/db_password
             # El primer nodo arranca con gcomm:// (vacío) para crear el clúster
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
-            MARIADB_GALERA_MARIABACKUP_PASSWORD: 1234
+            MARIADB_GALERA_MARIABACKUP_PASSWORD: /run/secrets/galera_sync_password
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://
         secrets:
             - db_root_password
             - db_password
+            - galera_sync_password
         volumes:
             - db_data_1:/bitnami/mariadb
         networks:
@@ -29,17 +34,22 @@ services:
 
     # Nodo 2 de la base de datos
     db-node2:
-        image: bitnami/mariadb-galera:latest
-        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_es_0900_ai_ci --skip-character-set-client-handshake
+        image: public.ecr.aws/bitnami/mariadb-galera:latest
+        command:
+            - /opt/bitnami/scripts/mariadb-galera/run.sh
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_es_0900_ai_ci
+            - --skip-character-set-client-handshake
         environment:
             MARIADB_GALERA_CLUSTER_NAME: votacion_db_cluster
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
-            MARIADB_GALERA_MARIABACKUP_PASSWORD: 1234
+            MARIADB_GALERA_MARIABACKUP_PASSWORD: /run/secrets/galera_sync_password
             # Apunta al nodo 1 para unirse al clúster
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node3
         secrets:
             - db_root_password
+            - galera_sync_password
         volumes:
             - db_data_2:/bitnami/mariadb
         depends_on:
@@ -53,17 +63,22 @@ services:
 
     # Nodo 3 de la base de datos
     db-node3:
-        image: bitnami/mariadb-galera:latest
-        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_es_0900_ai_ci --skip-character-set-client-handshake
+        image: public.ecr.aws/bitnami/mariadb-galera:latest
+        command:
+            - /opt/bitnami/scripts/mariadb-galera/run.sh
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_es_0900_ai_ci
+            - --skip-character-set-client-handshake
         environment:
             MARIADB_GALERA_CLUSTER_NAME: votacion_db_cluster
             MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
-            MARIADB_GALERA_MARIABACKUP_PASSWORD: 1234
+            MARIADB_GALERA_MARIABACKUP_PASSWORD: /run/secrets/galera_sync_password
             # Apunta al nodo 1 para unirse al clúster
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2
         secrets:
             - db_root_password
+            - galera_sync_password
         volumes:
             - db_data_3:/bitnami/mariadb
         depends_on:
@@ -125,6 +140,8 @@ services:
             PMA_HOST: db-proxy
             PMA_USER: user_appvotaciones
             PMA_PASSWORD_FILE: /run/secrets/db_password
+        secrets:
+            - db_password
         networks:
             - votacion_net
         deploy:
@@ -146,7 +163,6 @@ networks:
         driver: overlay # Red especial de Swarm para que los nodos se comuniquen
 
 volumes:
-    # db_data:
     db_data_1:
     db_data_2:
     db_data_3:
