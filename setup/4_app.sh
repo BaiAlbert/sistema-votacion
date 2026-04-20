@@ -51,7 +51,7 @@ systemctl start nginx
 
 echo "Configurando Nginx..."
 # Copiamos usando rutas relativas (como ya hemos hecho 'cd', el archivo está justo aquí)
-cp -f nginx/sistema-votacion /etc/nginx/sites-available/sistema-votacion
+cp -f infra/nginx/sistema-votacion /etc/nginx/sites-available/sistema-votacion
 # Creamos el acceso directo en sites-enabled para que Nginx lo lea
 ln -sf /etc/nginx/sites-available/sistema-votacion /etc/nginx/sites-enabled/sistema-votacion
 # Comprobamos y recargamos (reload es mejor que restart para no tirar a otros usuarios)
