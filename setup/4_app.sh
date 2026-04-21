@@ -86,13 +86,19 @@ echo "Compilando y subiendo la Base de Datos..."
 docker build -t $REGISTRY/votacion-db-galera:latest ./database
 docker push $REGISTRY/votacion-db-galera:latest
 
+docker builder prune -a -f
+
 echo "Compilando y subiendo el Backend..."
 docker build -t $REGISTRY/votacion-backend:latest ./backend
 docker push $REGISTRY/votacion-backend:latest
 
+docker builder prune -a -f
+
 echo "Compilando y subiendo el Frontend..."
 docker build -t $REGISTRY/votacion-frontend:latest ./frontend
 docker push $REGISTRY/votacion-frontend:latest
+
+docker builder prune -a -f
 
 # 7. Añadir labels a los nodos para que los servicios sepan en que maquinas alojarse
 docker node update --label-add role=database servidor-db
@@ -102,5 +108,7 @@ docker node update --label-add role=app servidor-worker2
 # 8. Despliegue final en el clúster
 echo "Desplegando el stack completo de la aplicación en nuestro swarm..."
 docker stack deploy -c docker-compose.yml app_votaciones
+
+docker builder prune -a -f
 
 echo "La aplicación ha sido desplegada y está corriendo."

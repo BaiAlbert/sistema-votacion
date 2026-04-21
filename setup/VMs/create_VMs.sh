@@ -8,21 +8,17 @@ RED='\e[31m'
 MAGENTA='\e[35m'
 RESET='\e[0m'
 
-# ==========================================
-# Configuración General
-# ==========================================
+# Configuración general
 RAM=2048
 CPUS=2
-DISK_SIZE=15360
+DISK_SIZE=20480
 OS_TYPE="Ubuntu_64"
 VBOX="vboxmanage" # En Ubuntu, vboxmanage se llama en minúsculas y está en el PATH
 
 # Lista de las 4 máquinas que vamos a crear
 VM_NAMES=("Test-App_Manager" "Test-App_DB" "Test-App_Worker1" "Test-App_Worker2")
 
-# ==========================================
 # PASO 1: Pedir al usuario la ISO de Ubuntu Server 24 LTS
-# ==========================================
 echo -e "${CYAN}Abriendo asistente para la ISO de Ubuntu...${RESET}"
 echo -e "Por favor, indica la ruta de la ISO de Ubuntu Server 24 LTS (Se usará para todas las VMs)."
 
@@ -39,9 +35,7 @@ while true; do
     fi
 done
 
-# ==========================================
 # PASO 2: Bucle de creación de VMs
-# ==========================================
 for NAME in "${VM_NAMES[@]}"; do
     echo -e "\n${MAGENTA}--------------------------------------------------${RESET}"
     echo -e "${YELLOW}Creando y configurando $NAME...${RESET}"
@@ -71,9 +65,7 @@ for NAME in "${VM_NAMES[@]}"; do
     echo -e "${GREEN}$NAME está lista.${RESET}"
 done
 
-# ==========================================
 # PASO 3: Menú de arranque de las máquinas recién creadas
-# ==========================================
 echo -e "\n${CYAN}==================================================${RESET}"
 echo -e "${GREEN}Las 4 máquinas han sido creadas exitosamente.${RESET}"
 echo -e "${YELLOW}¿Qué deseas hacer ahora?${RESET}"
@@ -93,7 +85,7 @@ case $opcion in
         for NAME in "${VM_NAMES[@]}"; do
             echo -e "${GREEN}Iniciando $NAME...${RESET}"
             $VBOX startvm "$NAME" --type gui
-            sleep 4 # Pausa de 4 segundos para no agobiar la CPU del host
+            sleep 5 # Pausa de 5 segundos para no agobiar la CPU del host
         done
         ;;
     *)

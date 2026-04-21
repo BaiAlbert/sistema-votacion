@@ -1,18 +1,14 @@
-﻿# ==========================================
-# Configuración General
-# ==========================================
+﻿# Configuración general
 $RAM = 2048
 $CPUS = 2
-$DISK_SIZE = 15360
+$DISK_SIZE = 20480
 $OS_TYPE = "Ubuntu_64"
 $VBOX = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 
 # Lista de las 4 máquinas que vamos a crear
 $VM_Names = @("Test-App_Manager", "Test-App_DB", "Test-App_Worker1", "Test-App_Worker2")
 
-# ==========================================
 # PASO 1: Pedir al usuario la ISO de Ubuntu Server 24 LTS
-# ==========================================
 Write-Host "Abriendo el explorador para seleccionar la ISO de Ubuntu..." -ForegroundColor Cyan
 Add-Type -AssemblyName System.Windows.Forms
 $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog
@@ -31,9 +27,7 @@ else {
     exit
 }
 
-# ==========================================
 # PASO 2: Bucle de creación de VMs
-# ==========================================
 foreach ($NAME in $VM_Names) {
     Write-Host "`n--------------------------------------------------" -ForegroundColor Magenta
     Write-Host "Creando y configurando $NAME..." -ForegroundColor Yellow
@@ -63,9 +57,7 @@ foreach ($NAME in $VM_Names) {
     Write-Host "$NAME está lista." -ForegroundColor Green
 }
 
-# ==========================================
 # PASO 3: Menú de arranque de las máquinas recién creadas
-# ==========================================
 Write-Host "`n==================================================" -ForegroundColor Cyan
 Write-Host "Las 4 máquinas han sido creadas exitosamente." -ForegroundColor Green
 Write-Host "¿Qué deseas hacer ahora?" -ForegroundColor Yellow
@@ -85,7 +77,7 @@ switch ($opcion) {
         foreach ($NAME in $VM_Names) {
             Write-Host "Iniciando $NAME..." -ForegroundColor Green
             & $VBOX startvm $NAME --type gui
-            Start-Sleep -Seconds 4 # Pausa de 4 segundos para no agobiar la CPU del host
+            Start-Sleep -Seconds 5 # Pausa de 5 segundos para no agobiar la CPU del host
         }
     }
     default {

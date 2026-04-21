@@ -1,54 +1,171 @@
 # Ruta: /etc/nginx/sites-available/sistema-votacion
 server {
     listen 80;
-    server_name _; # Esto hace que responda a cualquier IP o dominio que le llegue
+    server_name _; # Captura cualquier IP o dominio
+
+    # HEADERS DE SEGURIDAD GLOBALES
+    # Estos headers se aplican a todas las respuestas del servidor
+
+    # X-Frame-Options: Protege contra ataques de clickjacking
+    # Evita que el sitio se cargue dentro de iframes no autorizados
+    # Valor "SAMEORIGIN": solo permite iframes del mismo dominio original
+    # Un atacante podría crear un iframe con el sitio para robar clicks
+    # o credenciales mediante una interfaz superpuesta engañosa
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
+    # X-Content-Type-Options: Previene el MIME Sniffing
+    # Obliga al navegador a respetar el tipo de contenido que especificamos
+    # en lugar de intentar "adivinarlo" analizando el contenido
+    # Valor "nosniff": el navegador NO reanaliza ni cambia el tipo de contenido
+    # Un atacante podría servir un archivo malicioso como .js con
+    # contenido HTML; sin este header, el navegador podría ejecutarlo erroneamente
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # X-XSS-Protection: Activa la protección XSS del navegador
+    # Valor "1; mode=block": activa el filtro y bloquea la página si detecta XSS
+    # Añade una capa defensiva adicional contra inyección de scripts maliciosos,
+    # aunque los navegadores modernos tienen sus propias protecciones
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Referrer-Policy: Controla qué información del encabezado Referer se envía
+    # Valor "same-origin": solo envía el referer al mismo dominio original
+    # Sin esto, el navegador envia URLs completas (con tokens, sesiones)
+    # a otros sitios, lo que podría filtrar información sensible
+    add_header Referrer-Policy "same-origin" always;
+
+    # X-Download-Options: Solo para Windows, previene la ejecución de archivos descargados
+    # Valor "noopen": el navegador no abrirá ni ejecutará archivos descargados automáticamente
+    # Protege contra la ejecución de malware o scripts descargados sin consentimiento 
+    # explícito del usuario (Windows-only)
+    add_header X-Download-Options "noopen" always if "$nginx_version ~ Microsoft";
+
+    # X-Permitted-Cross-Domain-Policies: Controla políticas de dominio cruzado
+    # Valor "none": niega las solicitudes de políticas de dominios cruzados
+    # Previene que aplicaciones como Flash, Java o PDFs accedan a recursos
+    # del sitio sin autorización explícita
+    add_header X-Permitted-Cross-Domain-Policies "none" always;
 
     # 1. Enrutar el Frontend (React)
     location / {
         proxy_pass http://192.168.50.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # Headers de proxy básicos - identifican la conexión original
+        proxy_set_header Host $host; # Envía el Host original al backend
+        proxy_set_header X-Real-IP $remote_addr; # IP real del cliente
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # Cadena de IPs
+
+        # Cache-Control: Controla el comportamiento del caché del navegador
+        # Valor "no-cache": el navegador debe validar cada petición con el servidor
+        # El frontend es dinámico (React SPA), queremos que cada
+        # recarga muestre el estado actual, no datos en caché obsoletos
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+
+        # Etiqueta para que el navegador no guarde la página en historial
+        add_header Pragma "no-cache" always;
+
+        # ETag débil para prevenir problemas de validación de caché en caso
+        # de que los archivos del frontend sean comprimidos o algo
+        add_header ETag "W/$etag" always;
+
+        # No permitir reescritura automática de URLs
+        add_header X-Robots-Tag "none" always;
     }
 
-    # 2. Enrutar el Backend (PHP) usando el prefijo /api/
-    # La barra al final de 8000/ es importante. Hace que Nginx elimine el "/api"
+    # 2. Enrutar el Backend (API PHP)
+    # La barra al final de 8000/ es importante. Hace que Nginx elimine el "/api/"
     # antes de pasárselo al contenedor de PHP.
     location /api/ {
         proxy_pass http://192.168.50.1:8000/;
+
+        # Headers de proxy básicos
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # Cache-Control: Crítico para la API
+        # Valor "no-cache": cada petición a la API devuelve datos frescos
+        # Los datos de las votaciones son cambiantes, no queremos que
+        # el navegador guarde resultados de votaciones que pueden cambiar
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+
+        # Prevenir que el contenido sea reproducido
+        add_header Pragma "no-cache" always;
+
+        # ETag vacia para evitar problemas de validación de caché ya que el backend
+        # devuelve respuestas dinámicas
+        add_header ETag "" always;
+
+        # Seguridad adicional para la API
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "DENY" always; # API no debe ser embebida
+
+        # Opcional: Controlar el origen que consume la API
+        # add_header Access-Control-Allow-Origin "*" always; # Permite cualquier origen
     }
 
-    # 3. Enrutar phpMyAdmin (Opcional, pero cómodo)
-    location /pma/ {
-        # Seguridad para que solo la ip publica de mi maquina manager pueda entrar
-        # allow TU_IP_PUBLICA;
-        # deny all;
-
+    # 3. Enrutar phpMyAdmin
+    # Panel de administración para gestión visual de MySQL
+    location /phpmyadmin/ {
         proxy_pass http://192.168.50.1:8080/;
+
+        # Headers de proxy básicos
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+
+        # Headers de seguridad adicionales
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+
+        # Control de caché (no queremos caché en panel de administración)
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
     }
 
-    # 4. Enrutar Portainer (Interfaz de Docker)
-    # La barra al final de 9000/ es obligatoria
+    # 4. Enrutar Portainer (Gestor de Docker)
     location /portainer/ {
-        # Seguridad para que solo la ip publica de mi maquina manager pueda entrar
-        # allow TU_IP_PUBLICA;
-        # deny all;
-
         proxy_pass http://192.168.50.1:9000/;
 
-        # Cabeceras básicas
+        # Headers de proxy básicos
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        # Cabeceras para que funcione la terminal de Portainer (WebSockets)
+        # Headers para que funcione la terminal de Portainer (WebSockets)
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
+
+        # Headers de seguridad adicionales
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+
+        # Control de caché (un panel de admin no debe tener caché)
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+    }
+
+    # 5. Enrutar Grafana
+    location /grafana/ {
+        proxy_pass http://192.168.50.1:3001/;
+
+        # Headers de proxy básicos
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # Headers para que funcione la terminal de Portainer (WebSockets)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+
+        # Headers de seguridad adicionales
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "same-origin" always;
+
+        # Control de caché para dashboards
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
     }
 }

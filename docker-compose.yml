@@ -3,7 +3,7 @@ version: '3.8'
 services:
     # Nodo 1 de la base de datos: El inicializador del clúster galera
     db-node1:
-        image: 192.168.50.1:5000/votacion-db-galera:latest
+        image: public.ecr.aws/bitnami/mariadb-galera:latest
         command:
             - /opt/bitnami/scripts/mariadb-galera/run.sh
             - --character-set-server=utf8mb4
@@ -18,7 +18,7 @@ services:
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
             MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
             # Cambiar a gcomm://db-node1,db-node2,db-node3 una vez haya arrancado todo
-            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://
+            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2,db-node3
             MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: 'yes'
         secrets:
             - db_root_password
@@ -26,6 +26,7 @@ services:
             - galera_sync_password
         volumes:
             - db_data_1:/bitnami/mariadb
+            - ./database/02_esquema_db.sql:/docker-entrypoint-initdb.d/02_esquema_db.sql
         networks:
             - votacion_net
         deploy:
