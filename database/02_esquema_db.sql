@@ -1,3 +1,8 @@
+-- Creamos un usuario sin contraseña y con simple privilegio de usage (sinonimo de sin privilegios)
+-- para que haproxy pueda hacer sus healthchecks
+CREATE USER IF NOT EXISTS 'haproxy_check'@'%' IDENTIFIED BY '';
+GRANT USAGE ON *.* TO 'haproxy_check'@'%';
+
 USE db_appvotaciones;
 
 -- 1. TABLA: usuarios

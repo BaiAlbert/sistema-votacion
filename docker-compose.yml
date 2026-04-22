@@ -17,10 +17,9 @@ services:
             MARIADB_PASSWORD_FILE: /run/secrets/db_password
             MARIADB_GALERA_MARIABACKUP_USER: galera_sync_user_appvotaciones
             MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/galera_sync_password
-            # Cambiar a gcomm://db-node1,db-node2,db-node3 una vez haya arrancado todo
-            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2,db-node3
-            MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: 'yes'
+            # Cambiar a 'no' una vez haya arrancado todo
             MARIADB_GALERA_CLUSTER_BOOTSTRAP: 'yes'
+            MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2,db-node3
         secrets:
             - db_root_password
             - db_password
@@ -31,6 +30,7 @@ services:
         networks:
             - votacion_net
         deploy:
+            endpoint_mode: dnsrr # Desactiva el VIP de Swarm para este servicio
             placement:
                 constraints:
                     - node.labels.role == database
@@ -54,11 +54,10 @@ services:
             - galera_sync_password
         volumes:
             - db_data_2:/bitnami/mariadb
-        depends_on:
-            - db-node1
         networks:
             - votacion_net
         deploy:
+            endpoint_mode: dnsrr
             placement:
                 constraints:
                     - node.hostname == servidor-worker1
@@ -82,11 +81,10 @@ services:
             - galera_sync_password
         volumes:
             - db_data_3:/bitnami/mariadb
-        depends_on:
-            - db-node1
         networks:
             - votacion_net
         deploy:
+            endpoint_mode: dnsrr
             placement:
                 constraints:
                     - node.hostname == servidor-worker2
@@ -95,6 +93,8 @@ services:
         image: haproxy:lts
         volumes:
             - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+        ports:
+            - '8404:8404' # Panel de estadísticas
         networks:
             - votacion_net
         deploy:
