@@ -37,7 +37,7 @@ server {
     # Valor "noopen": el navegador no abrirá ni ejecutará archivos descargados automáticamente
     # Protege contra la ejecución de malware o scripts descargados sin consentimiento 
     # explícito del usuario (Windows-only)
-    add_header X-Download-Options "noopen" always if "$nginx_version ~ Microsoft";
+    add_header X-Download-Options "noopen" always;
 
     # X-Permitted-Cross-Domain-Policies: Controla políticas de dominio cruzado
     # Valor "none": niega las solicitudes de políticas de dominios cruzados
@@ -65,7 +65,7 @@ server {
 
         # ETag débil para prevenir problemas de validación de caché en caso
         # de que los archivos del frontend sean comprimidos o algo
-        add_header ETag "W/$etag" always;
+        # add_header ETag "W/$etag" always;
 
         # No permitir reescritura automática de URLs
         add_header X-Robots-Tag "none" always;

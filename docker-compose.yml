@@ -20,13 +20,14 @@ services:
             # Cambiar a gcomm://db-node1,db-node2,db-node3 una vez haya arrancado todo
             MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db-node1,db-node2,db-node3
             MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: 'yes'
+            MARIADB_GALERA_CLUSTER_BOOTSTRAP: 'yes'
         secrets:
             - db_root_password
             - db_password
             - galera_sync_password
         volumes:
             - db_data_1:/bitnami/mariadb
-            - ./database/02_esquema_db.sql:/docker-entrypoint-initdb.d/02_esquema_db.sql
+            - ./database/02_esquema_db.sql:/docker-entrypoint-initdb.d/02_esquema_db.sql:ro
         networks:
             - votacion_net
         deploy:

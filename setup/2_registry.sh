@@ -68,7 +68,7 @@ done
 # 6. Lanzar el Registry local
 echo ""
 echo "Desplegando el contenedor del Registry en el Manager..."
-docker run -d -p 5000:5000 --restart=always --name repositorios registry:2
+docker run -d -p 5000:5000 --restart=always --name repositorios registry:latest
 
 echo ""
 echo "Registry local desplegado y nodos configurados para permitir el registry en 192.168.50.1:5000"

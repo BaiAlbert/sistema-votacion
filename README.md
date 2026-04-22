@@ -59,7 +59,7 @@ Para no tener que crear las máquinas a mano en VirtualBox, dispones de scripts 
 
 - **Ejecución del Script:**
     1.  Si tu máquina anfitrión es Windows, ejecuta el script de PowerShell: [`create_VMs.ps1`](/setup/VMs/create_VMs.ps1). Si estás en Linux, ejecuta la variante en bash: [`create_VMs.sh`](/setup/VMs/create_VMs.sh).
-    2.  El script creará las 4 máquinas virtuales con las siguientes especificaciones: `2GB RAM`, `2 vCPUs`, `32MB VRAM`, `1 Disco VDI de 15GB`, `1 Lector CD/DVD` y `2 adaptadores de red` (NAT para internet y Red Interna "Red_Swarm" para el clúster).
+    2.  El script creará las 4 máquinas virtuales con las siguientes especificaciones: `2GB RAM`, `2 vCPUs`, `32MB VRAM`, `1 Disco VDI de 20GB`, `1 Lector CD/DVD` y `2 adaptadores de red` (NAT para internet y Red Interna "Red_Swarm" para el clúster).
     3.  Una vez creadas, el script abrirá el explorador de archivos para que selecciones la ISO de Ubuntu Server que has descargado previamente (en Linux pedirá la ruta por terminal).
     4.  Por último, te preguntará si deseas arrancar todas las máquinas a la vez **(Cuidado: esto supone una gran carga de RAM y CPU para el anfitrión)**, arrancar solo el Manager, o no arrancar ninguna.
 
@@ -73,7 +73,7 @@ Una vez creadas las máquinas virtuales, procederemos a instalar el sistema oper
     2.  Durante el asistente de Ubuntu, asegúrate de configurar estos parámetros clave (el resto pueden quedar por defecto):
         - **Nombre de usuario:** `alberto-ramirez`
         - **Contraseña:** `1234`
-        - **Nombre del servidor (Hostname):** `servidor-master` _(o `servidor-db`, `servidor-worker1`, `servidor-worker2` según corresponda)_.
+        - **Nombre del servidor (Hostname):** `servidor-manager` _(o `servidor-db`, `servidor-worker1`, `servidor-worker2` según corresponda)_.
         - **OpenSSH Server:** MÁRCALO para instalarlo (vital para el acceso remoto).
         - **Ubuntu Server (minimized):** NO lo marques, necesitamos la versión estándar.
 
@@ -94,7 +94,7 @@ Una vez creadas las máquinas virtuales, procederemos a instalar el sistema oper
 
         | Máquina              | IP enp0s3   | IP enp0s8      |
         | :------------------- | :---------- | :------------- |
-        | **servidor-master**  | `10.0.2.50` | `192.168.50.1` |
+        | **servidor-manager**  | `10.0.2.50` | `192.168.50.1` |
         | **servidor-db**      | `10.0.2.51` | `192.168.50.2` |
         | **servidor-worker1** | `10.0.2.52` | `192.168.50.3` |
         | **servidor-worker2** | `10.0.2.53` | `192.168.50.4` |
@@ -105,7 +105,6 @@ Una vez creadas las máquinas virtuales, procederemos a instalar el sistema oper
             ethernets:
                 enp0s3:
                     dhcp4: false
-                    dhcp6: false
                     addresses: [10.0.2.50/24]
                     routes:
                         - to: default
@@ -113,6 +112,8 @@ Una vez creadas las máquinas virtuales, procederemos a instalar el sistema oper
                     nameservers:
                         addresses: [1.1.1.1, 8.8.8.8]
                 enp0s8:
+                    dhcp4: false
+                    dhcp6: false
                     addresses: [192.168.50.1/24]
         ```
 
@@ -132,7 +133,7 @@ Para que el servidor Manager pueda enviar órdenes automáticas a los Workers y 
 Genera una clave SSH y cópiala a los otros nodos. Cuando ejecutes `ssh-copy-id`, te pedirá la contraseña (`1234`) por última vez.
 
 ```bash
-ssh-keygen -t ed25519 -C "servidor-master" -f ~/.ssh/id_ed25519 -N ""
+ssh-keygen -t ed25519 -C "servidor-manager" -f ~/.ssh/id_ed25519 -N ""
 ssh-copy-id alberto-ramirez@192.168.50.2
 ssh-copy-id alberto-ramirez@192.168.50.3
 ssh-copy-id alberto-ramirez@192.168.50.4
@@ -227,4 +228,4 @@ Abre tu navegador web y comprueba los siguientes accesos:
 
 - **Pagina web princiapl:** `http://192.168.50.1`
 - **Panel de Portainer:** `http://192.168.50.1/portainer` (Crea tu usuario y contraseña de administrador la primera vez que entres).
-- **Panel de phpMyAdmin:** `http://192.168.50.1/pma`
+- **Panel de phpMyAdmin:** `http://192.168.50.1/phpmyadmin`
