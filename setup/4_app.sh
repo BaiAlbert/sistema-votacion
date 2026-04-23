@@ -82,9 +82,9 @@ if ! docker secret ls | grep -qw "jwt_secret"; then
 fi
 
 # 6. Compilación y subida de imágenes
-echo "Compilando y subiendo la Base de Datos..."
-docker build -t $REGISTRY/votacion-db-galera:latest ./database
-docker push $REGISTRY/votacion-db-galera:latest
+# echo "Compilando y subiendo la Base de Datos..."
+# docker build -t $REGISTRY/votacion-db-galera:latest ./database
+# docker push $REGISTRY/votacion-db-galera:latest
 
 docker builder prune -a -f
 
@@ -100,15 +100,54 @@ docker push $REGISTRY/votacion-frontend:latest
 
 docker builder prune -a -f
 
-# 7. Añadir labels a los nodos para que los servicios sepan en que maquinas alojarse
-docker node update --label-add role=database servidor-db
-docker node update --label-add role=app servidor-worker1
-docker node update --label-add role=app servidor-worker2
+# 7. Añadir labels a los nodos
+echo "Asignando etiquetas a los nodos del clúster..."
+docker node update --label-add role=database servidor-db 2>/dev/null || true
+docker node update --label-add role=app servidor-worker1 2>/dev/null || true
+docker node update --label-add role=app servidor-worker2 2>/dev/null || true
+# El '2>/dev/null || true' es para que el script no falle si el label ya existe en futuras ejecuciones
 
-# 8. Despliegue final en el clúster
-echo "Desplegando el stack completo de la aplicación en nuestro swarm..."
+# 8. Despliegue Maestro en Docker Swarm
+echo "Iniciando la secuencia de despliegue con el clúster MariaDB Galera..."
+
+# 8.1 Preparación del archivo YAML (Modo Arranque)
+# Por si quedó un YAML modificado de pruebas anteriores
+echo "Configurando YAML para arranque inicial (Bootstrap: yes, Replicas: 0)..."
+sed -i "s/MARIADB_GALERA_CLUSTER_BOOTSTRAP: 'no'/MARIADB_GALERA_CLUSTER_BOOTSTRAP: 'yes'/g" docker-compose.yml
+sed -i "s/replicas: 1 # TARGET_NODO_GALERA/replicas: 0 # TARGET_NODO_GALERA/g" docker-compose.yml
+
+# 8.2 Primer Despliegue (Nace todo, pero Galera nace apagado)
+echo "Desplegando el stack completo..."
 docker stack deploy -c docker-compose.yml app_votaciones
 
+# 8.3 Encendido del db-node1
+echo "Encendiendo el db-node1 (Líder temporal)..."
+docker service scale votacion_db-node1=1
+
+# Esperamos a que el nodo 1 forme el clúster. 
+# En máquinas no tan rapidas o en el primer arranque, puede tardar hasta un minuto.
+echo "Esperando 45 segundos a que el líder cree el Primary Component..."
+sleep 45
+
+# 8.4 Encendido de los nodos secundarios
+echo "Encendiendo db-node2 y db-node3 para que se unan al líder..."
+docker service scale votacion_db-node2=1 votacion_db-node3=1
+
+# Esperamos a que hagan la transferencia de estado (SST)
+echo "Esperando 30 segundos a que los nodos secundarios se sincronicen..."
+sleep 30
+
+# 8.5 Modificación final del docker-compose (Modo Producción)
+# Lo dejamos asi post primer arranque para que no haya problemas si mueren y reinician
+echo "Modificando el docker-compose.yml para desactivar el Bootstrap..."
+sed -i "s/MARIADB_GALERA_CLUSTER_BOOTSTRAP: 'yes'/MARIADB_GALERA_CLUSTER_BOOTSTRAP: 'no'/g" docker-compose.yml
+sed -i "s/replicas: 0 # TARGET_NODO_GALERA/replicas: 1 # TARGET_NODO_GALERA/g" docker-compose.yml
+
+# 8.6 Despliegue Final
+echo "Desplegando configuración definitiva en Swarm..."
+docker stack deploy -c docker-compose.yml app_votaciones
+
+# Limpieza final de caché del builder
 docker builder prune -a -f
 
-echo "La aplicación ha sido desplegada y está corriendo."
+echo "La aplicación ha sido desplegada con exito."

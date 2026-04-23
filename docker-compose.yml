@@ -26,11 +26,15 @@ services:
             - galera_sync_password
         volumes:
             - db_data_1:/bitnami/mariadb
-            - ./database/02_esquema_db.sql:/docker-entrypoint-initdb.d/02_esquema_db.sql:ro
+        configs:
+            - source: esquema_sql
+              target: /docker-entrypoint-initdb.d/02_esquema_db.sql
+            - source: mock_data_sql
+              target: /docker-entrypoint-initdb.d/02_esquema_db.sql
         networks:
             - votacion_net
         deploy:
-            replicas: 0 # El script encender_db.sh se encarga de crear la replica necesaria
+            replicas: 0 # TARGET_NODO_GALERA
             endpoint_mode: dnsrr # Desactiva el VIP de Swarm para este servicio
             placement:
                 constraints:
@@ -58,7 +62,7 @@ services:
         networks:
             - votacion_net
         deploy:
-            replicas: 0 # El script encender_db.sh se encarga de crear la replica necesaria
+            replicas: 0 # TARGET_NODO_GALERA
             endpoint_mode: dnsrr
             placement:
                 constraints:
@@ -86,7 +90,7 @@ services:
         networks:
             - votacion_net
         deploy:
-            replicas: 0 # El script encender_db.sh se encarga de crear la replica necesaria
+            replicas: 0 # TARGET_NODO_GALERA
             endpoint_mode: dnsrr
             placement:
                 constraints:
@@ -174,7 +178,10 @@ services:
         ports:
             - '3001:3000'
         environment:
-            # Cambiar tras el arranque
+            GF_SERVER_DOMAIN: 192.168.50.1
+            GF_SERVER_ROOT_URL: http://192.168.50.1/grafana/
+            GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+            # Grafana preguntará si quieres cambiarla tras el primer login
             GF_SECURITY_ADMIN_PASSWORD: admin
         volumes:
             - grafana_data:/var/lib/grafana
@@ -188,6 +195,7 @@ services:
 
     node-exporter:
         image: prom/node-exporter:latest
+        hostname: "{{.Node.Hostname}}"
         volumes:
             - /proc:/host/proc:ro
             - /sys:/host/sys:ro
@@ -225,6 +233,12 @@ secrets:
 networks:
     votacion_net:
         driver: overlay # Red especial de Swarm para que los nodos se comuniquen
+
+configs:
+    esquema_sql:
+        file: ./database/02_esquema_db.sql
+    mock_data_sql:
+        file: ./database/03_mock_data.sql
 
 volumes:
     db_data_1:
