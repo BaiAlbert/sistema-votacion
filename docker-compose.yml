@@ -30,7 +30,7 @@ services:
             - source: esquema_sql
               target: /docker-entrypoint-initdb.d/02_esquema_db.sql
             - source: mock_data_sql
-              target: /docker-entrypoint-initdb.d/02_esquema_db.sql
+              target: /docker-entrypoint-initdb.d/03_mock_data.sql
         networks:
             - votacion_net
         deploy:
