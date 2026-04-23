@@ -122,7 +122,7 @@ docker stack deploy -c docker-compose.yml app_votaciones
 
 # 8.3 Encendido del db-node1
 echo "Encendiendo el db-node1 (Líder temporal)..."
-docker service scale votacion_db-node1=1
+docker service scale app_votaciones_db-node1=1
 
 # Esperamos a que el nodo 1 forme el clúster. 
 # En máquinas no tan rapidas o en el primer arranque, puede tardar hasta un minuto.
@@ -131,7 +131,7 @@ sleep 45
 
 # 8.4 Encendido de los nodos secundarios
 echo "Encendiendo db-node2 y db-node3 para que se unan al líder..."
-docker service scale votacion_db-node2=1 votacion_db-node3=1
+docker service scale app_votaciones_db-node2=1 app_votaciones_db-node3=1
 
 # Esperamos a que hagan la transferencia de estado (SST)
 echo "Esperando 30 segundos a que los nodos secundarios se sincronicen..."
