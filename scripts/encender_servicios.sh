@@ -9,6 +9,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+echo "Arrancando Prometheus..."
+docker service scale app_votaciones_prometheus=1
+
+echo "Arrancando Grafana..."
+docker service scale app_votaciones_grafana=1
+
 echo "Iniciando el arranque del cluster MariaDB Galera..."
 
 echo "Arrancando db-node1 (nodo principal temporal)..."

@@ -9,6 +9,17 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Apagamos Grafana y Prometheus de esta manera porque son servicios
+# con volumenes al igual que la base de datos, entonces apagarlos del tirón
+# haciendo shutdown a la maquina puede provocar problemas
+echo "Apagando Grafana..."
+docker service scale app_votaciones_grafana=0
+sleep 10
+
+echo "Apagando Prometheus..."
+docker service scale app_votaciones_prometheus=0
+sleep 10
+
 echo "Iniciando el apagado ordenado del cluster MariaDB Galera..."
 
 echo "Escalando db-node3 a 0..."
