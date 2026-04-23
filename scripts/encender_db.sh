@@ -14,8 +14,8 @@ echo "Iniciando el arranque del cluster MariaDB Galera..."
 echo "Arrancando db-node1 (nodo principal temporal)..."
 sudo docker service scale app_votaciones_db-node1=1
 
-echo "Esperando 15 segundos a que el nodo 1 forme el cluster..."
-sleep 15
+echo "Esperando 30 segundos a que el nodo 1 forme el cluster..."
+sleep 30
 
 echo "Arrancando db-node2 y db-node3 para que se unan..."
 sudo docker service scale app_votaciones_db-node2=1 app_votaciones_db-node3=1

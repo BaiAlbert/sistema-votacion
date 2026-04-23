@@ -30,6 +30,7 @@ services:
         networks:
             - votacion_net
         deploy:
+            replicas: 0 # El script encender_db.sh se encarga de crear la replica necesaria
             endpoint_mode: dnsrr # Desactiva el VIP de Swarm para este servicio
             placement:
                 constraints:
@@ -57,6 +58,7 @@ services:
         networks:
             - votacion_net
         deploy:
+            replicas: 0 # El script encender_db.sh se encarga de crear la replica necesaria
             endpoint_mode: dnsrr
             placement:
                 constraints:
@@ -84,6 +86,7 @@ services:
         networks:
             - votacion_net
         deploy:
+            replicas: 0 # El script encender_db.sh se encarga de crear la replica necesaria
             endpoint_mode: dnsrr
             placement:
                 constraints:
