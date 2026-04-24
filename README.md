@@ -1,6 +1,8 @@
 # sistema-votacion
 
-Sistema de Votaciones Electronicas. TFC Alberto Ramírez Fernández
+Este proyecto es un **Sistema de Votación Electrónica** desarrollado como Trabajo de Fin de Ciclo (TFC) para el Grado Superior de ASIR. Más allá de la propia aplicación web, el verdadero núcleo del proyecto es el diseño y despliegue de una infraestructura moderna orientada a la **Alta Disponibilidad (HA)** y la resiliencia, construida sobre un clúster de **Docker Swarm** de 4 nodos.
+
+La arquitectura integra un clúster de base de datos multi-master (**MariaDB Galera**) respaldado por un balanceador TCP (**HAProxy**), enrutamiento y seguridad web centralizada mediante **Nginx**, y una pila de monitorización en tiempo real con **Prometheus y Grafana**. Además, todo el ciclo de vida del entorno (desde el aprovisionamiento de las máquinas virtuales hasta el despliegue de los servicios y copias de seguridad) está lo más automatizado posible mediante *scripts*, aplicando principios de Infraestructura como Código (IaC).
 
 ---
 
@@ -73,8 +75,9 @@ Una vez creadas las máquinas virtuales, procederemos a instalar el sistema oper
     2.  Durante el asistente de Ubuntu, asegúrate de configurar estos parámetros clave (el resto pueden quedar por defecto):
         - **Nombre de usuario:** `alberto-ramirez`
         - **Contraseña:** `1234`
+        - **Particiones:** Asegúrate de que la partición principal está usando todo el espacio disponible.
         - **Nombre del servidor (Hostname):** `servidor-manager` _(o `servidor-db`, `servidor-worker1`, `servidor-worker2` según corresponda)_.
-        - **OpenSSH Server:** MÁRCALO para instalarlo (vital para el acceso remoto).
+        - **OpenSSH Server:** Márcalo para instalarlo (vital para el acceso remoto).
         - **Ubuntu Server (minimized):** NO lo marques, necesitamos la versión estándar.
 
     3.  Una vez instalado el sistema y tras el primer reinicio, actualiza los repositorios en todas las máquinas con:
@@ -90,7 +93,7 @@ Una vez creadas las máquinas virtuales, procederemos a instalar el sistema oper
         ```
 
         Sustituye el contenido por el siguiente bloque de código (respeta los espacios exactamente).
-        **Importante:** Asegurate de cambiar las IPs según corresponda la máquina, siguiendo la siguiente tabla.
+        **Importante:** Asegúrate de cambiar las IPs según corresponda la máquina, siguiendo la siguiente tabla.
 
         | Máquina              | IP enp0s3   | IP enp0s8      |
         | :------------------- | :---------- | :------------- |
@@ -226,6 +229,59 @@ _(Fíjate en la columna `REPLICAS`. Si un servicio dice `2/2` o `1/1`, significa
 **3. Pruebas de acceso web (Desde tu navegador en Windows 10):**
 Abre tu navegador web y comprueba los siguientes accesos:
 
-- **Pagina web princiapl:** `http://192.168.50.1`
+- **Página web principal:** `http://192.168.50.1`
 - **Panel de Portainer:** `http://192.168.50.1/portainer` (Crea tu usuario y contraseña de administrador la primera vez que entres).
 - **Panel de phpMyAdmin:** `http://192.168.50.1/phpmyadmin`
+- **Panel de Grafana:** `http://192.168.50.1/grafana/` (User: admin, Pass: Admin)
+- **Panel de HAProxy:** `http://192.168.50.1:8404/stats`
+
+---
+
+# Gestión del Ciclo de Vida del Entorno (Apagado y Encendido Seguro)
+
+La arquitectura de este proyecto incluye componentes críticos con estado (*stateful*), como el clúster MariaDB Galera y el stack de monitorización (Prometheus y Grafana). Al utilizar volúmenes persistentes, un apagado abrupto de las máquinas virtuales puede provocar corrupción de datos o la desincronización total del clúster. 
+
+Por ello, el apagado y encendido del entorno debe realizarse de manera ordenada mediante los scripts proporcionados.
+
+### 1. Preparación previa
+Asegúrate de haber otorgado permisos de ejecución a todos los scripts de la carpeta (esto solo es necesario la primera vez):
+```bash
+sudo chmod +x ./scripts/*.sh
+```
+
+### 2. Procedimiento de Apagado (Shutdown)
+
+> **ATENCIÓN:** Nunca apagues las máquinas virtuales "a lo bruto" desde VirtualBox sin haber detenido antes los servicios con los scripts proporcionados.
+
+Desde la terminal del **Manager**, ejecuta el script de apagado ([`apagar_servicios.sh`](/scripts/apagar_servicios.sh)). Este script se encargará de reducir las réplicas a 0 y detener los contenedores críticos de manera controlada y en el orden correcto.
+
+```bash
+sudo ./scripts/apagar_servicios.sh
+```
+
+Espera a que el script finalice y muestre el mensaje **Ya puedes apagar las maquinas**. A continuación, apaga los nodos *workers* remotamente y, por último, el nodo *manager*:
+
+```bash
+# Apagar los Workers remotamente (pedirá la contraseña de sudo de cada nodo)
+ssh -t servidor-worker2 "sudo shutdown -h now"
+ssh -t servidor-worker1 "sudo shutdown -h now"
+ssh -t servidor-db "sudo shutdown -h now"
+
+# Apagar el Manager (máquina actual)
+sudo shutdown -h now
+```
+
+### 3. Procedimiento de Encendido (Startup)
+
+Para volver a levantar el entorno, primero inicia las 4 máquinas virtuales desde VirtualBox. Espera un par de minutos para que los sistemas operativos y Docker Engine arranquen por completo.
+
+A continuación, desde la terminal del **Manager**, ejecuta el script de encendido ([`encender_servicios.sh`](/scripts/encender_servicios.sh)):
+
+```bash
+sudo ./scripts/encender_servicios.sh
+```
+
+## ¿Por qué es tan importante este proceso?
+El componente más sensible de esta infraestructura es el **clúster MariaDB Galera**. En Galera, cuando los nodos se detienen, el último nodo en apagarse registra en su estado interno el valor `safe_to_bootstrap: 1`. 
+
+Si los nodos se apagan de golpe (por ejemplo, cortando la corriente de las VMs), es muy probable que ningún nodo registre este estado de seguridad. Si esto ocurre, al volver a encenderlos, el clúster entrará en pánico por miedo a la corrupción de datos (*split-brain*) y no arrancará por sí solo, requiriendo una intervención manual de recuperación avanzada. Estos scripts automatizan el proceso de apagado secuencial para garantizar que el clúster siempre se cierre de forma consistente y segura.

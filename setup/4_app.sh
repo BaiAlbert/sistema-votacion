@@ -125,7 +125,7 @@ echo "Encendiendo el db-node1 (Líder temporal)..."
 docker service scale app_votaciones_db-node1=1
 
 # Esperamos a que el nodo 1 forme el clúster. 
-# En máquinas no tan rapidas o en el primer arranque, puede tardar hasta un minuto.
+# En máquinas no tan rápidas o en el primer arranque, puede tardar hasta un minuto.
 echo "Esperando 45 segundos a que el líder cree el Primary Component..."
 sleep 45
 
@@ -150,4 +150,4 @@ docker stack deploy -c docker-compose.yml app_votaciones
 # Limpieza final de caché del builder
 docker builder prune -a -f
 
-echo "La aplicación ha sido desplegada con exito."
+echo "La aplicación ha sido desplegada con éxito."
