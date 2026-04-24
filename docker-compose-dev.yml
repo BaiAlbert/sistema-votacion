@@ -1,57 +1,58 @@
 version: '3.8'
 
 services:
-  # 1. Base de datos (Un solo nodo, simple y rápida)
-  db:
-      image: mariadb:12.2.2 # Ya que nuestro Galera de producción usa MariaDB 12.2.2
-      environment:
-          MARIADB_ROOT_PASSWORD: root
-          MARIADB_DATABASE: db_appvotaciones
-          MARIADB_USER: user_appvotaciones
-          MARIADB_PASSWORD: 1234
-      ports:
-          - "3306:3306"
-      volumes:
-          # Datos persistentes en local
-          - db_data_local:/var/lib/mysql
-          # Autocarga de esquemas y datos mockeados (igual que en producción)
-          - ./database/1_esquema_db.sql:/docker-entrypoint-initdb.d/1_esquema_db.sql
-          - ./database/2_mock_data.sql:/docker-entrypoint-initdb.d/2_mock_data.sql
+    # 1. Base de datos (Un solo nodo, simple y rápida)
+    db:
+        image: mariadb:12.2.2 # Ya que nuestro Galera de producción usa MariaDB 12.2.2
+        environment:
+            MARIADB_ROOT_PASSWORD: root
+            MARIADB_DATABASE: db_appvotaciones
+            MARIADB_USER: user_appvotaciones
+            MARIADB_PASSWORD: 1234
+        ports:
+            - '3306:3306'
+        volumes:
+            # Datos persistentes en local
+            - db_data_local:/var/lib/mysql
+            # Autocarga de esquemas y datos mockeados (igual que en producción)
+            - ./database/1_esquema_db.sql:/docker-entrypoint-initdb.d/1_esquema_db.sql
+            - ./database/2_mock_data.sql:/docker-entrypoint-initdb.d/2_mock_data.sql
 
-  # 2. Backend (API PHP)
-  backend:
-      build:
-          context: ./backend
-          dockerfile: Dockerfile
-      ports:
-          - "8000:80"
-      environment:
-          DB_HOST: db
-          DB_NAME: db_appvotaciones
-          DB_USER: user_appvotaciones
-          DB_PASSWORD: 1234  # Reemplaza el uso de secretos por variable plana
-          JWT_SECRET: zhQYaPDmP01q2DOMPHdfVF6ne5eb84xlD1XVjLQoFTTzCHFUHVCKCwB1MF98y5VUVvIab7SQ57JPlVQNmd1tNe
-      volumes:
-          # TRUCO DE MAGIA: Montamos tu código local dentro del contenedor.
-          # Así, si editas un archivo PHP, cambia al instante sin reiniciar.
-          - ./backend:/var/www/html
+    # 2. Backend (API PHP)
+    backend:
+        build:
+            context: ./backend
+            dockerfile: Dockerfile
+        ports:
+            - '8000:80'
+        environment:
+            DB_HOST: db
+            DB_NAME: db_appvotaciones
+            DB_USER: user_appvotaciones
+            DB_PASSWORD: 1234 # Reemplaza el uso de secretos por variable plana
+            JWT_SECRET: zhQYaPDmP01q2DOMPHdfVF6ne5eb84xlD1XVjLQoFTTzCHFUHVCKCwB1MF98y5VUVvIab7SQ57JPlVQNmd1tNe
+        volumes:
+            # TRUCO DE MAGIA: Montamos tu código local dentro del contenedor.
+            # Así, si editas un archivo PHP, cambia al instante sin reiniciar.
+            - ./backend:/var/www/html
+            - /var/www/html/vendor
 
-  # 3. Frontend (React + Vite)
-  frontend:
-      image: node:24-bookworm-slim
-      working_dir: /app
-      # Instala dependencias y lanza el servidor de desarrollo de Vite
-      command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
-      ports:
-          - "3000:3000"
-      environment:
-          # Vite necesita saber dónde está la API
-          - VITE_API_URL=http://localhost:8000/api
-      volumes:
-          # Montamos el código local para que el "Hot Module Replacement" funcione
-          - ./frontend:/app
-          # Evitamos sobreescribir los node_modules del contenedor
-          - /app/node_modules
+    # 3. Frontend (React + Vite)
+    frontend:
+        image: node:24-bookworm-slim
+        working_dir: /app
+        # Instala dependencias y lanza el servidor de desarrollo de Vite
+        command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
+        ports:
+            - '3000:3000'
+        environment:
+            # Vite necesita saber dónde está la API
+            - VITE_API_URL=http://localhost:8000/api
+        volumes:
+            # Montamos el código local para que el "Hot Module Replacement" funcione
+            - ./frontend:/app
+            # Evitamos sobreescribir los node_modules del contenedor
+            - /app/node_modules
 
 volumes:
     db_data_local:

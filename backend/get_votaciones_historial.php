@@ -28,7 +28,11 @@ use Firebase\JWT\Key;
 include_once 'config/db.php';
 
 $headers = getallheaders();
-$authHeader = $headers['Authorization'] ?? '';
+// Para evitar problemas con cualquier tipo de proxy
+$authHeader = $headers['Authorization'] 
+           ?? $headers['authorization'] 
+           ?? $_SERVER['HTTP_AUTHORIZATION'] 
+           ?? '';
 
 if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
     http_response_code(401);
@@ -73,7 +77,7 @@ try {
 
     // Montamos la consulta maestra de Votaciones Elegibles
     // Condiciones: cerrada manualmente o fecha actual mayor a fecha_final
-    $sql = "SELECT id, titulo, descripcion, tipo, alcance, fecha_final 
+    $sql = "SELECT id, titulo, descripcion, tipo, alcance, fecha_final, id_opcion_ganadora 
             FROM votaciones 
             WHERE (cerrada = 1 
             OR NOW() > fecha_final)
@@ -118,6 +122,8 @@ try {
             FROM opciones 
             WHERE id_votacion = ?
         ");
+        
+        $stmtUpdateWinner = $conexion->prepare("UPDATE votaciones SET id_opcion_ganadora = ? WHERE id = ?");
 
         foreach ($votaciones as &$votacion) {
             $vid = $votacion['id'];
@@ -133,19 +139,30 @@ try {
             // Calculamos el total de votos para sacar porcentajes y la opción ganadora
             $maxVotos = 0;
             $totalVotosVotacion = 0;
+            $ganadorIdActual = $votacion['id_opcion_ganadora'];
 
             foreach ($opciones as &$opcion) {
                 $opcion['total_votos'] = (int)$opcion['total_votos'];
                 $totalVotosVotacion += $opcion['total_votos'];
 
-                if ($opcion['total_votos'] > $maxVotos) {
-                    $maxVotos = $opcion['total_votos'];
+                // Si no hay ganador guardado, buscamos la opción con más votos
+                if (is_null($votacion['id_opcion_ganadora'])) {
+                    if ($opcion['total_votos'] > $maxVotos) {
+                        $maxVotos = $opcion['total_votos'];
+                        $ganadorIdActual = $opcion['id'];
+                    }
                 }
             }
 
-            // Asignamos ganador y calcular porcentaje
+            // Si no teníamos ganador y hemos encontrado uno (es decir, maxVotos > 0), lo guardamos
+            if (is_null($votacion['id_opcion_ganadora']) && $ganadorIdActual !== null && $maxVotos > 0) {
+                $stmtUpdateWinner->execute([$ganadorIdActual, $vid]);
+                $votacion['id_opcion_ganadora'] = $ganadorIdActual;
+            }
+
+            // Asignamos ganador y calcular porcentaje para la respuesta limpia al frontend
             foreach ($opciones as &$opcion) {
-                $opcion['isWinner'] = ($maxVotos > 0 && $opcion['total_votos'] === $maxVotos);
+                $opcion['isWinner'] = (!is_null($votacion['id_opcion_ganadora']) && $opcion['id'] === $votacion['id_opcion_ganadora']);
                 $opcion['porcentaje'] = $totalVotosVotacion > 0 ? round(($opcion['total_votos'] / $totalVotosVotacion) * 100) : 0;
             }
 

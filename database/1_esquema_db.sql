@@ -82,6 +82,7 @@ CREATE TABLE `votaciones` (
   -- Control de estado
   `cerrada` boolean NOT NULL DEFAULT false COMMENT 'True si ha sido cerrada manualmente por un admin antes de tiempo',
   `razon_cierre` text COMMENT 'Explicación de por qué se clausuró prematuramente',
+  `id_opcion_ganadora` integer DEFAULT NULL COMMENT 'Almacena la opción con más votos al finalizar',
   
   FOREIGN KEY (`id_autor`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_grupo`) REFERENCES `grupos` (`id`) ON DELETE CASCADE
@@ -98,6 +99,15 @@ CREATE TABLE `opciones` (
   FOREIGN KEY (`id_votacion`) REFERENCES `votaciones` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
+-- Establecemos la relación de la opción ganadora en la tabla votaciones
+-- Lo hacemos después de la creación de la tabla opciones ya que lo ideal seria
+-- hacerlo cuando creamos la tabla votaciones pero en ese momento no existe la 
+-- tabla opciones y MariaDB lanzaría un error
+ALTER TABLE `votaciones` 
+  ADD CONSTRAINT `fk_opcion_ganadora` 
+  FOREIGN KEY (`id_opcion_ganadora`) 
+  REFERENCES `opciones` (`id`) 
+  ON DELETE SET NULL;
 
 -- SISTEMA DE ANONIMATO E INTEGRIDAD
 -- Las siguientes dos tablas se encargan de separar "Quién ha votado" de 

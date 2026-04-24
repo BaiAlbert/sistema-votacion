@@ -118,8 +118,8 @@ export default function VotingsHistory() {
 					const votedOptionStr = getVotedOptionFromStorage(votacion.id);
 					const votedOptionId = votedOptionStr ? parseInt(votedOptionStr, 10) : null;
 
-					// Calcular el total de votos absolutos de esta votación para hacer la barra de progreso
-					const totalVotosVotacion = votacion.opciones.reduce((acc, current) => acc + current.total_votos, 0);
+					// El backend ya nos provee el total_votos a nivel de votación
+					const totalVotosVotacion = votacion.total_votos;
 
 					return (
 						<div key={votacion.id} style={cardStyle}>
@@ -193,10 +193,7 @@ export default function VotingsHistory() {
 							<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
 								{votacion.opciones.map((opcion) => {
 									const isTheVotedOne = votedOptionId === opcion.id;
-									const percentage =
-										totalVotosVotacion > 0
-											? Math.round((opcion.total_votos / totalVotosVotacion) * 100)
-											: 0;
+									const percentage = opcion.porcentaje;
 
 									// Lógica de estilos y bordes según estado del voto
 									let borderColor = 'rgba(255,255,255,0.1)';

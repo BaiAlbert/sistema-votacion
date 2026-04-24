@@ -31,7 +31,11 @@ use Firebase\JWT\Key;
 include_once 'config/db.php';
 
 $headers = getallheaders();
-$authHeader = $headers['Authorization'] ?? '';
+// Para evitar problemas con cualquier tipo de proxy
+$authHeader = $headers['Authorization'] 
+           ?? $headers['authorization'] 
+           ?? $_SERVER['HTTP_AUTHORIZATION'] 
+           ?? '';
 
 if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
     http_response_code(401);

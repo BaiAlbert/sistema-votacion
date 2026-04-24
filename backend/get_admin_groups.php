@@ -34,7 +34,11 @@ $jwt_secret = $_ENV['JWT_SECRET'];
 
 // Extraemos el encabezado "Authorization" que el frontend de React envía 
 $headers = apache_request_headers();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
+// Para evitar problemas con cualquier tipo de proxy
+$authHeader = $headers['Authorization'] 
+           ?? $headers['authorization'] 
+           ?? $_SERVER['HTTP_AUTHORIZATION'] 
+           ?? '';
 
 // Si no nos mandan nada, echamos fuera al atacante/visitante
 if (!$authHeader) {
