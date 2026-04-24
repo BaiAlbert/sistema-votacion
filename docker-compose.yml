@@ -28,9 +28,9 @@ services:
             - db_data_1:/bitnami/mariadb
         configs:
             - source: esquema_sql
-              target: /docker-entrypoint-initdb.d/02_esquema_db.sql
+              target: /docker-entrypoint-initdb.d/1_esquema_db.sql
             - source: mock_data_sql
-              target: /docker-entrypoint-initdb.d/03_mock_data.sql
+              target: /docker-entrypoint-initdb.d/2_mock_data.sql
         networks:
             - votacion_net
         deploy:
@@ -236,9 +236,9 @@ networks:
 
 configs:
     esquema_sql:
-        file: ./database/02_esquema_db.sql
+        file: ./database/1_esquema_db.sql
     mock_data_sql:
-        file: ./database/03_mock_data.sql
+        file: ./database/2_mock_data.sql
 
 volumes:
     db_data_1:
