@@ -31,6 +31,7 @@ services:
             DB_USER: user_appvotaciones
             DB_PASSWORD: 1234 # Reemplaza el uso de secretos por variable plana
             JWT_SECRET: zhQYaPDmP01q2DOMPHdfVF6ne5eb84xlD1XVjLQoFTTzCHFUHVCKCwB1MF98y5VUVvIab7SQ57JPlVQNmd1tNe
+            DNI_PEPPER: 6234d7de184292ef59a0cf23089445b41c00e0504659889a9a304eff2e65fac1
         volumes:
             # TRUCO DE MAGIA: Montamos tu código local dentro del contenedor.
             # Así, si editas un archivo PHP, cambia al instante sin reiniciar.

@@ -10,19 +10,19 @@ export const authService = {
 	/**
 	 * Inicia sesión en el sistema.
 	 *
-	 * @param {string} email - El correo electrónico del usuario.
+	 * @param {string} dni - El DNI del usuario.
 	 * @param {string} password - La contraseña del usuario.
 	 * @returns {Promise<string>} - Promesa que devuelve el Token JWT si el login es exitoso.
 	 * @throws {Error} - Lanza un error si las credenciales son incorrectas o falla la conexión.
 	 */
-	async login(email, password) {
+	async login(dni, password) {
 		// Realizamos una petición POST al backend
 		const response = await fetch(`${API_URL}/login.php`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ email, password }),
+			body: JSON.stringify({ dni, password }),
 		});
 
 		const data = await response.json();

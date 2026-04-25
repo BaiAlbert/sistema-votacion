@@ -21,26 +21,26 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. USUARIOS
 -- 1.1 Administradores de Gobierno (3)
-INSERT INTO usuarios (dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol) VALUES
-('11111111A', 'admin_gob1', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Carlos', 'Gómez', 'carlos.gob@test.com', '600000001', 'Madrid', 'Madrid', 'admin_gobierno'),
-('22222222B', 'admin_gob2', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Laura', 'Pérez', 'laura.gob@test.com', '600000002', 'Valencia', 'Valencia', 'admin_gobierno'),
-('33333333C', 'admin_gob3', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Miguel', 'Sánchez', 'miguel.gob@test.com', '600000003', 'Andalucía', 'Sevilla', 'admin_gobierno');
+INSERT INTO usuarios (dni_hash, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol) VALUES
+('865e612301d939fefa31fb24721dc2305fb53713993616eb89169c57ff455011', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Carlos', 'Gómez', 'carlos.gob@test.com', '600000001', 'Madrid', 'Madrid', 'admin_gobierno'),
+('f267aa26c2834d63d82187bf8dbbd7405f5c16d0529aa74c405262c03c48567c', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Laura', 'Pérez', 'laura.gob@test.com', '600000002', 'Valencia', 'Valencia', 'admin_gobierno'),
+('1c4fd9d806326f6fe307bce4675974d5c5d843aedb94babd9a15f8c23a522674', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Miguel', 'Sánchez', 'miguel.gob@test.com', '600000003', 'Andalucía', 'Sevilla', 'admin_gobierno');
 
 -- 1.2 Administradores Privados (4)
-INSERT INTO usuarios (dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol) VALUES
-('44444444D', 'admin_priv1', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Luis', 'Fernández', 'luis.priv@test.com', '600000004', 'Madrid', 'Madrid', 'admin_privado'),
-('55555555E', 'admin_priv2', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Marta', 'Jiménez', 'marta.priv@test.com', '600000005', 'Valencia', 'Alicante', 'admin_privado'),
-('66666666F', 'admin_priv3', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Elena', 'Ruiz', 'elena.priv@test.com', '600000006', 'Andalucía', 'Sevilla', 'admin_privado'),
-('77777777G', 'admin_priv4', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Jorge', 'Martín', 'jorge.priv@test.com', '600000007', 'Madrid', 'Madrid', 'admin_privado');
+INSERT INTO usuarios (dni_hash, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol) VALUES
+('0fc292162cd6dfe0bbb290dc852ad9498a649250dcf6bbacc43a9b8a4db869c5', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Luis', 'Fernández', 'luis.priv@test.com', '600000004', 'Madrid', 'Madrid', 'admin_privado'),
+('896874420ee96a369c9ba237fb2f3ae449961c9a8401f763631809582c3feab6', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Marta', 'Jiménez', 'marta.priv@test.com', '600000005', 'Valencia', 'Alicante', 'admin_privado'),
+('2ff02968910a2a974330232ed9bca0facf31ac5a36f57aa8d3c0beac286e9d6c', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Elena', 'Ruiz', 'elena.priv@test.com', '600000006', 'Andalucía', 'Sevilla', 'admin_privado'),
+('b85b314d7e91a8fd2156be86126e8ff1567da8a8d7465ed17ee186d9043c9fcd', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Jorge', 'Martín', 'jorge.priv@test.com', '600000007', 'Madrid', 'Madrid', 'admin_privado');
 
 -- 1.3 Votantes (6 - Segmentados geográficamente)
-INSERT INTO usuarios (dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol) VALUES
-('88888888H', 'votante_mad1', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Ana', 'López', 'ana.mad@test.com', '600000008', 'Madrid', 'Madrid', 'votante'),
-('99999999J', 'votante_mad2', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Pedro', 'Díaz', 'pedro.mad@test.com', '600000009', 'Madrid', 'Madrid', 'votante'),
-('10101010K', 'votante_val1', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Sofia', 'Martínez', 'sofia.val@test.com', '600000010', 'Valencia', 'Alicante', 'votante'),
-('11110000L', 'votante_val2', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Pablo', 'García', 'pablo.val@test.com', '600000011', 'Valencia', 'Alicante', 'votante'),
-('12121212M', 'votante_and1', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Lucia', 'Herrera', 'lucia.and@test.com', '600000012', 'Andalucía', 'Sevilla', 'votante'),
-('13131313N', 'votante_and2', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Diego', 'Torres', 'diego.and@test.com', '600000013', 'Andalucía', 'Sevilla', 'votante');
+INSERT INTO usuarios (dni_hash, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol) VALUES
+('077bc460c4b70813460bc076755a786f43d783640a04938bf238588e207e4034', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Ana', 'López', 'ana.mad@test.com', '600000008', 'Madrid', 'Madrid', 'votante'),
+('1e14262a6519bc449b752008c7f8471383941fddbbfe1ef8537897850d3ee26e', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Pedro', 'Díaz', 'pedro.mad@test.com', '600000009', 'Madrid', 'Madrid', 'votante'),
+('6c50a4677075b8a83d460f3dc1bd53b559dfe1032f2e5f4e96f12137ee3f0348', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Sofia', 'Martínez', 'sofia.val@test.com', '600000010', 'Valencia', 'Alicante', 'votante'),
+('182e8f78a3a4c9966bb211bdca182ecdd5ab24e99e00931227fae2beb28c8a6f', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Pablo', 'García', 'pablo.val@test.com', '600000011', 'Valencia', 'Alicante', 'votante'),
+('dafda918c60261ee6d669f1ffe3684a3738e65c002ff85244d95b39b25e63a90', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Lucia', 'Herrera', 'lucia.and@test.com', '600000012', 'Andalucía', 'Sevilla', 'votante'),
+('bcee24a369616b089ad9dd0df5871456b873e7a47b663bcc1fbd3b53aa0e82f8', '$2y$10$fedjXy3MLNjDguwZZkf4Ie.7kab4/YGmtYdPhBJgZn1ipiM3avZJy', 'Diego', 'Torres', 'diego.and@test.com', '600000013', 'Andalucía', 'Sevilla', 'votante');
 
 
 -- 2. GRUPOS (3 distintos)

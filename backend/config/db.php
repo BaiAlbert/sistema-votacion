@@ -20,7 +20,8 @@ $host = $_ENV['DB_HOST'];
 $db = $_ENV['DB_NAME'];
 $user = $_ENV['DB_USER'];
 $pass = file_exists('/run/secrets/db_password') ? trim(file_get_contents('/run/secrets/db_password')) : $_ENV['DB_PASSWORD'];
-$jwt_secret = "zhQYaPDmP01q2DOMPHdfVF6ne5eb84xlD1XVjLQoFTTzCHFUHVCKCwB1MF98y5VUVvIab7SQ57JPlVQNmd1tNe"; // file_exists('/run/secrets/jwt_secret') ? trim(file_get_contents('/run/secrets/jwt_secret')) : $_ENV['JWT_SECRET'];
+$jwt_secret = file_exists('/run/secrets/jwt_secret') ? trim(file_get_contents('/run/secrets/jwt_secret')) : $_ENV['JWT_SECRET'];
+$dni_pepper = file_exists('/run/secrets/dni_pepper') ? trim(file_get_contents('/run/secrets/dni_pepper')) : $_ENV['DNI_PEPPER'];
 
 // Creamos la conexión usando PDO
 try {

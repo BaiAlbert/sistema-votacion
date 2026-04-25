@@ -30,13 +30,11 @@ $input = json_decode(file_get_contents('php://input'), true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validamos los campos obligatorios
-    if (empty($input['username']) || empty($input['password']) || empty($input['email']) || empty($input['dni'])) {
+    if (empty($input['password']) || empty($input['email']) || empty($input['dni'])) {
         http_response_code(400); // Bad Request
         echo json_encode(["error" => "Datos incompletos"]);
         exit;
     }
-
-    $username = $input['username'];
     
     // Hasheamos la contraseña usando el algoritmo por defecto (actualmente bcrypt)
     // Esto es esencial para la seguridad, ya que nunca debemos guardar 
@@ -62,19 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Volcamos los límites en un array donde la Clave es el nombre de la columna y el Valor es el límite numérico
     $limites = $limites_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $max_username = $limites['username'] ?? 50;
     $max_email = $limites['email'] ?? 100;
-    $max_nombre = $limites['nombre'] ?? 50;
-    $max_apellidos = $limites['apellidos'] ?? 100;
-    $max_provincia = $limites['provincia'] ?? 50;
-    $max_ciudad = $limites['ciudad'] ?? 50;
-
-    // Validar Username (dinámico)
-    if (strlen($username) > $max_username) {
-        http_response_code(400);
-        echo json_encode(["error" => "El nombre de usuario no puede exceder los $max_username caracteres"]);
-        exit;
-    }
 
     // Validar Email (dinámico)
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > $max_email) {
@@ -89,6 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(["error" => "El DNI debe tener 8 números y una letra"]);
         exit;
     }
+
+    // Hasheamos el DNI para guardarlo de forma anónima
+    $dni_hash = hash_hmac('sha256', strtoupper($dni), $dni_pepper);
 
     // Validar Nombre (sin números, dinámico)
     if (!empty($nombre)) {
@@ -157,13 +146,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // IMPORTANTISIMO: Usamos signos de interrogación (?) como marcadores.
     // En lugar de concatenar el string, le pasamos los datos a PDO en la ejecución.
     // Esta es la barrera defensiva número uno contra Inyecciones SQL (SQLi).
-    $sql = "INSERT INTO usuarios (dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO usuarios (dni_hash, password, nombre, apellidos, email, num_telefono, provincia, ciudad) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     try {
         $stmt = $conexion->prepare($sql);
         // Ejecutamos la consulta, PDO reemplaza los "?" con los valores de este array de forma segura
-        if ($stmt->execute([$dni, $username, $password, $nombre, $apellidos, $email, $num_telefono, $provincia, $ciudad])) {
+        if ($stmt->execute([$dni_hash, $password, $nombre, $apellidos, $email, $num_telefono, $provincia, $ciudad])) {
             echo json_encode(["message" => "Usuario registrado con éxito"]);
         }
     } catch (PDOException $e) {

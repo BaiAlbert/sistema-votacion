@@ -31,30 +31,33 @@ include_once 'config/db.php';
 $input = json_decode(file_get_contents('php://input'), true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validamos que se hayan enviado el email y la contraseña
-    if (empty($input['email']) || empty($input['password'])) {
+    // Validamos que se hayan enviado el DNI y la contraseña
+    if (empty($input['dni']) || empty($input['password'])) {
         http_response_code(400); // Bad request
-        echo json_encode(["error" => "Email y contraseña requeridos"]);
+        echo json_encode(["error" => "DNI y contraseña requeridos"]);
         exit;
     }
 
-    $email = $input['email'];
+    $dni = $input['dni'];
     $password = $input['password'];
 
-    // Validamos el Email con su respectivo formato antes de ir a la base de datos
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    // Validamos el formato del DNI
+    if (!preg_match('/^[0-9]{8}[A-Za-z]$/', $dni)) {
         http_response_code(400);
-        echo json_encode(["error" => "El formato del correo es inválido"]);
+        echo json_encode(["error" => "El formato del DNI es inválido"]);
         exit;
     }
 
-    // Preparamos la consulta SQL para buscar al usuario por su correo electrónico.
+    // Hasheamos el DNI para compararlo con la base de datos
+    $dni_hash = hash_hmac('sha256', strtoupper($dni), $dni_pepper);
+
+    // Preparamos la consulta SQL para buscar al usuario por su DNI hasheado.
     // El uso de '?' evita ataques de Inyección SQL.
-    $sql = "SELECT id, dni, username, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol, fecha_creacion FROM usuarios WHERE email = ?";
+    $sql = "SELECT id, password, nombre, apellidos, email, num_telefono, provincia, ciudad, rol, fecha_creacion FROM usuarios WHERE dni_hash = ?";
     $stmt = $conexion->prepare($sql);
     
-    // Ejecutamos la consulta inyectando la variable $email de forma segura
-    $stmt->execute([$email]);
+    // Ejecutamos la consulta inyectando la variable $dni_hash de forma segura
+    $stmt->execute([$dni_hash]);
 
     // Comprobamos si el usuario existe en la base de datos volcando el resultado en $user
     if ($user = $stmt->fetch()) {
@@ -92,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["error" => "Credenciales incorrectas"]);
         }
     } else {
-        // No se encontró ningún usuario con ese email
+        // No se encontró ningún usuario con ese DNI
         http_response_code(401);
         echo json_encode(["error" => "Usuario no encontrado"]);
     }

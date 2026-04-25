@@ -54,7 +54,7 @@ try {
     // Esto es vital: aunque el token diga que es admin_privado, si le quitamos ese rol 
     // en la base de datos mientras tenía sesión iniciada, al consultar esto forzamos 
     // que el Frontend reciba su nuevo rol real y le cierre los menús de administrador.
-    $sql = "SELECT id, dni, username, nombre, apellidos, email, num_telefono, provincia, ciudad, rol FROM usuarios WHERE id = ?";
+    $sql = "SELECT id, dni_hash, nombre, apellidos, email, num_telefono, provincia, ciudad, rol FROM usuarios WHERE id = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->execute([$userId]);
     

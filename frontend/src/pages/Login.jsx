@@ -17,7 +17,7 @@ import { Alert } from '../components/Alert';
  */
 function Login() {
 	// Estados locales para el formulario
-	const [email, setEmail] = useState('');
+	const [dni, setDni] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
 	const [invalidField, setInvalidField] = useState(''); // Guarda qué campo dio error
@@ -35,17 +35,17 @@ function Login() {
 		setError('');
 		setInvalidField('');
 
-		// Validación de email
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			setInvalidField('email');
+		// Validación de DNI
+		const dniRegex = /^[0-9]{8}[A-Za-z]$/;
+		if (!dniRegex.test(dni)) {
+			setInvalidField('dni');
 			window.scrollTo({ top: 0, behavior: 'smooth' });
-			return setError('El formato del correo electrónico es inválido.');
+			return setError('El DNI debe tener 8 números y una letra.');
 		}
 
 		try {
 			// Intentamos loguear con el servicio y obtenemos el token
-			const token = await authService.login(email, password);
+			const token = await authService.login(dni, password);
 
 			// Si funciona, actualizamos el estado global pasándole el token
 			await login(token);
@@ -96,12 +96,13 @@ function Login() {
 
 				<form onSubmit={handleSubmit}>
 					<Input
-						name="email"
-						type="email"
-						placeholder="Email"
-						value={email}
-						onChange={(e) => { setEmail(e.target.value); if (invalidField === 'email') setInvalidField('') }}
-						isInvalid={invalidField === 'email'}
+						name="dni"
+						type="text"
+						placeholder="DNI"
+						maxLength="9"
+						value={dni}
+						onChange={(e) => { setDni(e.target.value); if (invalidField === 'dni') setInvalidField('') }}
+						isInvalid={invalidField === 'dni'}
 					/>
 
 					<Input

@@ -17,7 +17,6 @@ import { Alert } from '../components/Alert';
 function Register() {
 	const [formData, setFormData] = useState({
 		dni: '',
-		username: '',
 		password: '',
 		nombre: '',
 		apellidos: '',
@@ -140,24 +139,56 @@ function Register() {
 						placeholder="DNI"
 						maxLength="9"
 						onChange={handleChange}
-						estiloExtra={{ gridColumn: 'span 2' }}
 						isInvalid={invalidField === 'dni'}
 					></Input>
-					<Input name="username" placeholder="Usuario" maxLength="50" onChange={handleChange} isInvalid={invalidField === 'username'}></Input>
-					<Input name="password" type="password" placeholder="Contraseña" onChange={handleChange} isInvalid={invalidField === 'password'}></Input>
-					<Input name="nombre" type="text" placeholder="Nombre" maxLength="50" onChange={handleChange} isInvalid={invalidField === 'nombre'}></Input>
-					<Input name="apellidos" type="text" placeholder="Apellidos" maxLength="100" onChange={handleChange} isInvalid={invalidField === 'apellidos'}></Input>
+					<Input
+						name="password"
+						type="password"
+						placeholder="Contraseña"
+						onChange={handleChange}
+						isInvalid={invalidField === 'password'}
+					></Input>
+					<Input
+						name="nombre"
+						type="text"
+						placeholder="Nombre"
+						maxLength="50"
+						onChange={handleChange}
+						isInvalid={invalidField === 'nombre'}
+					></Input>
+					<Input
+						name="apellidos"
+						type="text"
+						placeholder="Apellidos"
+						maxLength="100"
+						onChange={handleChange}
+						isInvalid={invalidField === 'apellidos'}
+					></Input>
 					<Input
 						name="email"
 						type="email"
-						placeholder="Correo electronico"
+						placeholder="Correo electrónico"
 						maxLength="100"
 						onChange={handleChange}
 						estiloExtra={{ gridColumn: 'span 2' }}
 						isInvalid={invalidField === 'email'}
 					></Input>
-					<Input name="num_telefono" type="tel" placeholder="Telefono" maxLength="9" onChange={handleChange} isInvalid={invalidField === 'num_telefono'}></Input>
-					<Input name="provincia" type="text" placeholder="Provincia" maxLength="50" onChange={handleChange} isInvalid={invalidField === 'provincia'}></Input>
+					<Input
+						name="num_telefono"
+						type="tel"
+						placeholder="Teléfono"
+						maxLength="9"
+						onChange={handleChange}
+						isInvalid={invalidField === 'num_telefono'}
+					></Input>
+					<Input
+						name="provincia"
+						type="text"
+						placeholder="Provincia"
+						maxLength="50"
+						onChange={handleChange}
+						isInvalid={invalidField === 'provincia'}
+					></Input>
 					<Input
 						name="ciudad"
 						type="text"

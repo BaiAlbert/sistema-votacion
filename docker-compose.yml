@@ -120,6 +120,7 @@ services:
         secrets:
             - db_password
             - jwt_secret
+            - dni_pepper
         networks:
             - votacion_net
         deploy:
@@ -180,7 +181,7 @@ services:
         environment:
             GF_SERVER_DOMAIN: 192.168.50.1
             GF_SERVER_ROOT_URL: http://192.168.50.1/grafana/
-            GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+            GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
             # Grafana preguntará si quieres cambiarla tras el primer login
             GF_SECURITY_ADMIN_PASSWORD: admin
         volumes:
@@ -195,7 +196,7 @@ services:
 
     node-exporter:
         image: prom/node-exporter:latest
-        hostname: "{{.Node.Hostname}}"
+        hostname: '{{.Node.Hostname}}'
         volumes:
             - /proc:/host/proc:ro
             - /sys:/host/sys:ro
@@ -228,6 +229,8 @@ secrets:
     galera_sync_password:
         external: true
     jwt_secret:
+        external: true
+    dni_pepper:
         external: true
 
 networks:

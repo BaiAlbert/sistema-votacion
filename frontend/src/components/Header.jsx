@@ -53,7 +53,7 @@ export function Header({ titulo }) {
 				{/* Renderizado condicional: Si hay usuario, mostramos "Cerrar Sesión", si no "Iniciar Sesión" */}
 				{user ? (
 					<>
-						<p>Bienvenido, {user.username}</p>
+						<p>Bienvenido, {user.nombre} {user.apellidos}</p>
 						<Button
 							onClick={() => {
 								logout(); // Limpia el estado global

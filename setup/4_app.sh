@@ -81,6 +81,11 @@ if ! docker secret ls | grep -qw "jwt_secret"; then
     openssl rand -hex 64 | docker secret create jwt_secret -
 fi
 
+if ! docker secret ls | grep -qw "dni_pepper"; then
+    echo "Creando secreto dni_pepper..."
+    openssl rand -hex 32 | docker secret create dni_pepper -
+fi
+
 # 6. Compilación y subida de imágenes
 # echo "Compilando y subiendo la Base de Datos..."
 # docker build -t $REGISTRY/votacion-db-galera:latest ./database

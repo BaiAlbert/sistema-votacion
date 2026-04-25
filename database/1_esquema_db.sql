@@ -9,8 +9,7 @@ USE db_appvotaciones;
 -- Almacena la información de los votantes y administradores en el sistema.
 CREATE TABLE `usuarios` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `dni` varchar(9) UNIQUE NOT NULL,
-  `username` varchar(50) UNIQUE NOT NULL,
+  `dni_hash` varchar(64) UNIQUE NOT NULL COMMENT 'Hash HMAC SHA-256 del DNI',
   `password` varchar(255) NOT NULL COMMENT 'Hasheada con bcrypt',
   `nombre` varchar(50) NOT NULL,
   `apellidos` varchar(100) NOT NULL,
