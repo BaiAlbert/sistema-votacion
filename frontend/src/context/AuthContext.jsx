@@ -14,8 +14,8 @@ const AuthContext = createContext(null);
  */
 export const AuthProvider = ({ children }) => {
 	/**
-	 * Ejecutamos una funcion en el useState ya que esto se ejecuta 
-	 * una sola vez antes de pintar nada en pantalla, obtenemos el user 
+	 * Ejecutamos una funcion en el useState ya que esto se ejecuta
+	 * una sola vez antes de pintar nada en pantalla, obtenemos el user
 	 * del localStorage, si hay user en el localStorage le pasamos los datos
 	 * del usuario, y si no, iniciamos el estado en null.
 	 */
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
 	/**
 	 * Función para iniciar sesión.
-	 * Recibe el TOKEN generado por PHP, y lo usamos para obtener 
+	 * Recibe el TOKEN generado por PHP, y lo usamos para obtener
 	 * de inmediato los datos de usuario y dejarlo guardado.
 	 */
 	const login = async (token) => {
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
 			const userData = await authService.verifyToken(token);
 			setUser(userData);
 		} catch (error) {
-			console.error("Error validando el token recién creado en login:", error.message);
+			console.error('Error validando el token recién creado en login:', error.message);
 		}
 	};
 
@@ -64,8 +64,8 @@ export const AuthProvider = ({ children }) => {
 	 * Limpia el estado y elimina el TOKEN de localStorage.
 	 */
 	const logout = () => {
-		setUser(null);
 		localStorage.removeItem('token');
+		setUser(null);
 	};
 
 	// Mientras verificamos el token inicial, no renderizamos las rutas para evitar

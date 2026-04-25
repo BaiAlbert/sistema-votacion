@@ -87,13 +87,13 @@ export function Landing() {
 
 	return (
 		<div style={mainContainerStyle}>
-			<Header titulo="VotoTech B2B" />
+			<Header titulo="ElectoNet" />
 
 			<main style={heroSectionStyle}>
 				<h1 style={titleStyle}>Elecciones Transparentes para Organizaciones Modernas</h1>
-				
+
 				<p style={subtitleStyle}>
-					Una plataforma integral diseñada para empresas, sindicatos e instituciones que requieren la máxima 
+					Una plataforma integral diseñada para empresas, sindicatos e instituciones que requieren la máxima
 					seguridad, privacidad y verificabilidad en sus procesos de votación electrónica.
 				</p>
 
@@ -104,42 +104,67 @@ export function Landing() {
 					<Button onClick={() => navigate('/register')} secondary width="200px">
 						Registrarse
 					</Button>
-					<Button onClick={handleCreateOrg} width="250px" estiloExtra={{ backgroundColor: '#10b981', color: 'white' }}>
+					<Button
+						onClick={handleCreateOrg}
+						width="250px"
+						estiloExtra={{ backgroundColor: '#10b981', color: 'white' }}
+					>
 						Crear una organización
 					</Button>
 				</div>
 
 				<div style={featuresContainerStyle}>
-					<div 
+					<div
 						style={featureCardStyle}
-						onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)'; }}
-						onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+						onMouseEnter={(e) => {
+							e.currentTarget.style.transform = 'translateY(-5px)';
+							e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
+						}}
+						onMouseLeave={(e) => {
+							e.currentTarget.style.transform = 'translateY(0)';
+							e.currentTarget.style.boxShadow = 'none';
+						}}
 					>
 						<h3 style={featureTitleStyle}>🔒 Seguridad Criptográfica</h3>
 						<p style={featureTextStyle}>
-							Protegemos la integridad de cada voto mediante algoritmos criptográficos avanzados, garantizando que los resultados sean inmutables y 100% precisos.
+							Protegemos la integridad de cada voto mediante algoritmos criptográficos avanzados,
+							garantizando que los resultados sean inmutables y 100% precisos.
 						</p>
 					</div>
 
-					<div 
+					<div
 						style={featureCardStyle}
-						onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)'; }}
-						onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+						onMouseEnter={(e) => {
+							e.currentTarget.style.transform = 'translateY(-5px)';
+							e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
+						}}
+						onMouseLeave={(e) => {
+							e.currentTarget.style.transform = 'translateY(0)';
+							e.currentTarget.style.boxShadow = 'none';
+						}}
 					>
 						<h3 style={featureTitleStyle}>👁️ Transparencia Absoluta</h3>
 						<p style={featureTextStyle}>
-							Cada elección puede ser auditada de manera independiente, permitiendo a los participantes verificar que su voto fue contado correctamente sin comprometer su identidad.
+							Cada elección puede ser auditada de manera independiente, permitiendo a los participantes
+							verificar que su voto fue contado correctamente sin comprometer su identidad.
 						</p>
 					</div>
 
-					<div 
+					<div
 						style={featureCardStyle}
-						onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)'; }}
-						onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+						onMouseEnter={(e) => {
+							e.currentTarget.style.transform = 'translateY(-5px)';
+							e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
+						}}
+						onMouseLeave={(e) => {
+							e.currentTarget.style.transform = 'translateY(0)';
+							e.currentTarget.style.boxShadow = 'none';
+						}}
 					>
 						<h3 style={featureTitleStyle}>⚡ Alta Disponibilidad</h3>
 						<p style={featureTextStyle}>
-							Nuestra infraestructura distribuida asegura que la plataforma se mantenga operativa bajo altos volúmenes de tráfico concurrente, ideal para asambleas masivas.
+							Nuestra infraestructura distribuida asegura que la plataforma se mantenga operativa bajo
+							altos volúmenes de tráfico concurrente, ideal para asambleas masivas.
 						</p>
 					</div>
 				</div>

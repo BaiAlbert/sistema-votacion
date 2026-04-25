@@ -9,24 +9,21 @@ import Register from './pages/Register.jsx';
 import AdminArea from './pages/AdminArea.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
+function HomePage() {
+	return (
+		<>
+			<Header titulo="ElectoNet" />
+			<Body />
+		</>
+	);
+}
+
 function App() {
 	const { user } = useAuth();
 
 	return (
 		<Routes>
-			<Route
-				path="/"
-				element={
-					user ? (
-						<>
-							<Header titulo="Sistema de Votación"></Header>
-							<Body />
-						</>
-					) : (
-						<Landing />
-					)
-				}
-			/>
+			<Route path="/" element={user ? <HomePage /> : <Landing />} />
 			<Route path="/login" element={<Login />} />
 			<Route path="/register" element={<Register />} />
 			<Route path="/admin" element={<AdminArea />} />
