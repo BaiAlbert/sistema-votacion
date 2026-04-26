@@ -20,18 +20,18 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit(0);
 }
 
+// Conexión a base de datos y dependencias
 require 'vendor/autoload.php';
+include_once 'config/db.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-include_once 'config/db.php';
-
 $headers = getallheaders();
-// Para evitar problemas con cualquier tipo de proxy
 $authHeader = $headers['Authorization'] 
            ?? $headers['authorization'] 
            ?? $_SERVER['HTTP_AUTHORIZATION'] 

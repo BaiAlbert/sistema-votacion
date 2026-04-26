@@ -25,7 +25,7 @@ function AdminArea() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const defaultTipo = user?.rol === 'admin_privado' ? 'privada' : 'gubernamental';
+    const defaultTipo = user?.rol === 'admin_gobierno' ? 'gubernamental' : 'privada';
 
     const [formData, setFormData] = useState({
         titulo: '',
@@ -46,27 +46,31 @@ function AdminArea() {
     const [invalidField, setInvalidField] = useState('');
     const [successMsg, setSuccessMsg] = useState(''); // Estado para mensaje de éxito
     const [adminGroups, setAdminGroups] = useState([]);
+    const [loadingGroups, setLoadingGroups] = useState(user?.rol !== 'admin_gobierno');
 
     useEffect(() => {
-        if (user?.rol === 'admin_privado') {
+        if (user && user.rol !== 'admin_gobierno') {
             const fetchGroups = async () => {
                 try {
                     const groups = await votacionesService.getAdminGroups();
                     setAdminGroups(groups);
                 } catch (err) {
-                    setError('Error al cargar tus grupos: ' + err.message);
+                    setError('Error al cargar tus organizaciones: ' + err.message);
+                } finally {
+                    setLoadingGroups(false);
                 }
             };
             fetchGroups();
         }
     }, [user]);
 
-    // Redirigir si no es admin
-    if (!user || (user.rol !== "admin_privado" && user.rol !== "admin_gobierno")) {
+    // Ya no bloqueamos la renderización aquí porque la lista de grupos carga asíncronamente.
+    // Solo bloqueamos el botón de submit si no tienen grupos ni son admin del gobierno.
+    if (!user) {
         return (
             <div style={{ color: 'white', textAlign: 'center', marginTop: '100px' }}>
-                <h2>Acceso denegado</h2>
-                <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+                <h2>Debes iniciar sesión</h2>
+                <Button onClick={() => navigate('/login')}>Ir al Login</Button>
             </div>
         );
     }
@@ -248,7 +252,15 @@ function AdminArea() {
                 <Alert type="error" message={error} />
                 <Alert type="success" message={successMsg} />
 
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                {loadingGroups ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>Cargando organizaciones...</div>
+                ) : (user?.rol !== 'admin_gobierno' && adminGroups.length === 0) ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                        <p style={{ marginBottom: '1.5rem', color: '#cbd5e1' }}>No administras ninguna organización. Únete o crea una para poder publicar votaciones privadas.</p>
+                        <Button onClick={() => navigate('/')}>Volver al panel principal</Button>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                     <Input
                         name="titulo"
                         type="text"
@@ -299,7 +311,7 @@ function AdminArea() {
                             ]}
                             disabled // Forzamos el lock basado en el rol inicial
                         />
-                        <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '-0.3rem', marginBottom: '1rem' }}>* El tipo de votación está bloqueado según tu rol de administrador.</p>
+                        <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '-0.3rem', marginBottom: '1rem' }}>* El tipo de votación gubernamental es exclusivo para administradores de gobierno.</p>
                     </div>
 
                     {formData.tipo === 'gubernamental' && (
@@ -351,7 +363,7 @@ function AdminArea() {
                     {formData.tipo === 'privada' && (
                         <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#38bdf8' }}>Configuración Privada</label>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Grupo Organizador:</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>Organización Organizadora:</label>
                             <Select
                                 name="id_grupo"
                                 value={formData.id_grupo}
@@ -360,7 +372,7 @@ function AdminArea() {
                                     ...adminGroups.map(g => ({ value: g.id.toString(), label: g.nombre }))
                                 ]}
                             />
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.5rem' }}>* Solo puedes organizar votaciones para los grupos que administras.</p>
+                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.5rem' }}>* Solo puedes organizar votaciones para las organizaciones que administras.</p>
                         </div>
                     )}
 
@@ -411,10 +423,17 @@ function AdminArea() {
                         ))}
                     </div>
 
-                    <Button type="submit" width="100%" estiloExtra={{ marginTop: '1rem' }}>
-                        Crear Votación
+                    <Button 
+                        type="submit" 
+                        width="100%" 
+                        estiloExtra={{ marginTop: '1rem' }}
+                        disabled={formData.tipo === 'privada' && adminGroups.length === 0}
+                        title={formData.tipo === 'privada' && adminGroups.length === 0 ? "No administras ninguna organización" : ""}
+                    >
+                        {formData.tipo === 'privada' && adminGroups.length === 0 ? 'No administras organizaciones' : 'Crear Votación'}
                     </Button>
                 </form>
+                )}
             </div>
         </motion.div>
     );

@@ -12,10 +12,6 @@
 
 require 'vendor/autoload.php';
 
-// Cargamos las variables de entorno
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->safeLoad();
-
 $host = $_ENV['DB_HOST'];
 $db = $_ENV['DB_NAME'];
 $user = $_ENV['DB_USER'];

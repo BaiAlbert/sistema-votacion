@@ -17,11 +17,15 @@ export default function ActiveVotings() {
 	// Ej: { 15: 42, 16: 55 } donde clave es id_votacion, valor es id_opcion
 	const [selectedOptions, setSelectedOptions] = useState({});
 
-	// Modal State
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalVotacion, setModalVotacion] = useState(null);
 	const [modalOpcion, setModalOpcion] = useState(null);
 	const [firmaNombre, setFirmaNombre] = useState('');
+
+	// Close Modal State
+	const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+	const [closeModalVotacion, setCloseModalVotacion] = useState(null);
+	const [closeReason, setCloseReason] = useState('');
 
 	useEffect(() => {
 		let isMounted = true;
@@ -67,6 +71,20 @@ export default function ActiveVotings() {
 		setFirmaNombre('');
 	};
 
+	const openCloseModal = (votacion) => {
+		setCloseModalVotacion(votacion);
+		setCloseReason('');
+		setError('');
+		setSuccessMsg('');
+		setIsCloseModalOpen(true);
+	};
+
+	const closeCloseModal = () => {
+		setIsCloseModalOpen(false);
+		setCloseModalVotacion(null);
+		setCloseReason('');
+	};
+
 	const handleVoteConfirm = async () => {
 		if (!firmaNombre.trim()) {
 			setError('La firma es obligatoria.');
@@ -99,6 +117,30 @@ export default function ActiveVotings() {
 
 	const getVotedOptionFromStorage = (votacionId) => {
 		return localStorage.getItem(`voto_votacion_${votacionId}`);
+	};
+
+	const handleCloseConfirm = async () => {
+		if (!closeReason.trim()) {
+			setError('El motivo del cierre es obligatorio.');
+			return;
+		}
+
+		try {
+			await votacionesService.cerrarVotacion({
+				id_votacion: closeModalVotacion.id,
+				razon_cierre: closeReason,
+			});
+
+			setSuccessMsg('Votación cerrada con éxito.');
+			setVotaciones((prev) => prev.filter((v) => v.id !== closeModalVotacion.id));
+
+			setTimeout(() => {
+				closeCloseModal();
+				setSuccessMsg('');
+			}, 2000);
+		} catch (err) {
+			setError(err.message);
+		}
 	};
 
 	const formatFecha = (fechaStr) => {
@@ -150,8 +192,8 @@ export default function ActiveVotings() {
 				Participa en las elecciones disponibles para ti
 			</h3>
 
-			{!isModalOpen && <Alert type="success" message={successMsg} />}
-			{!isModalOpen && <Alert type="error" message={error} />}
+			{!isModalOpen && !isCloseModalOpen && <Alert type="success" message={successMsg} />}
+			{!isModalOpen && !isCloseModalOpen && <Alert type="error" message={error} />}
 
 			{votaciones.length === 0 ? (
 				<div
@@ -193,7 +235,9 @@ export default function ActiveVotings() {
 										border: '1px solid rgba(56, 189, 248, 0.5)',
 									}}
 								>
-									{votacion.tipo.toUpperCase()}
+									{votacion.tipo === 'privada' && votacion.organizacion_nombre
+										? `PRIVADA: ${votacion.organizacion_nombre.toUpperCase()}`
+										: votacion.tipo.toUpperCase()}
 								</span>
 							</div>
 
@@ -317,7 +361,18 @@ export default function ActiveVotings() {
 								})}
 							</div>
 
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								{votacion.es_admin_org ? (
+									<Button
+										secondary
+										onClick={() => openCloseModal(votacion)}
+										estiloExtra={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', borderColor: 'rgba(220, 38, 38, 0.3)', color: '#ef4444', padding: '0.5rem 1rem' }}
+									>
+										Cerrar Votación
+									</Button>
+								) : (
+									<div /> // Spacer
+								)}
 								{votacion.hasVoted ? (
 									<Button
 										secondary
@@ -426,6 +481,93 @@ export default function ActiveVotings() {
 								</Button>
 								<Button onClick={handleVoteConfirm} disabled={!!successMsg}>
 									Firmar y Emitir Voto
+								</Button>
+							</div>
+						</motion.div>
+					</motion.div>
+				)}
+
+				{isCloseModalOpen && (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						style={{
+							position: 'fixed',
+							top: 0,
+							left: 0,
+							width: '100vw',
+							height: '100vh',
+							backgroundColor: 'rgba(15, 23, 42, 0.8)',
+							backdropFilter: 'blur(5px)',
+							zIndex: 9999,
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+							padding: '1rem',
+						}}
+					>
+						<motion.div
+							initial={{ scale: 0.9, y: 20 }}
+							animate={{ scale: 1, y: 0 }}
+							exit={{ scale: 0.9, y: 20 }}
+							style={{
+								backgroundColor: 'rgba(30, 41, 59, 1)',
+								border: '1px solid rgba(220, 38, 38, 0.3)',
+								borderRadius: '16px',
+								padding: '2rem',
+								width: '100%',
+								maxWidth: '500px',
+								boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+								color: 'white',
+							}}
+						>
+							<h3 style={{ marginTop: 0, color: '#ef4444', marginBottom: '1rem' }}>
+								Clausurar Votación
+							</h3>
+							<p
+								style={{
+									fontSize: '0.9rem',
+									color: 'rgba(255,255,255,0.8)',
+									marginBottom: '1.5rem',
+									lineHeight: '1.5',
+								}}
+							>
+								Estás a punto de cerrar manualmente la votación{' '}
+								<strong>"{closeModalVotacion?.titulo}"</strong>. <br />
+								<br />
+								Esta acción adelantará la fecha final, procederá al escrutinio automático para declarar una opción ganadora, y la votación pasará inmediatamente al historial. <strong>Esta acción es irreversible.</strong>
+							</p>
+
+							<Alert type="error" message={error} />
+							<Alert type="success" message={successMsg} />
+
+							<div style={{ marginBottom: '1.5rem' }}>
+								<label
+									style={{
+										display: 'block',
+										fontSize: '0.9rem',
+										marginBottom: '0.5rem',
+										color: 'rgba(255,255,255,0.6)',
+									}}
+								>
+									Motivo del cierre anticipado (público):
+								</label>
+								<Input
+									type="text"
+									placeholder="Ej: Mayoría absoluta alcanzada, urgencia resolutiva..."
+									value={closeReason}
+									onChange={(e) => setCloseReason(e.target.value)}
+									isInvalid={!!error}
+								/>
+							</div>
+
+							<div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+								<Button secondary onClick={closeCloseModal} disabled={!!successMsg}>
+									Cancelar
+								</Button>
+								<Button onClick={handleCloseConfirm} disabled={!!successMsg} estiloExtra={{ backgroundColor: '#ef4444', borderColor: '#b91c1c' }}>
+									Clausurar Definitivamente
 								</Button>
 							</div>
 						</motion.div>

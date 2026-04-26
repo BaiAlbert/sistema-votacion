@@ -130,4 +130,29 @@ export const votacionesService = {
 
 		return data.votaciones || [];
 	},
+
+	/**
+	 * Cierra anticipadamente una votación privada.
+	 *
+	 * @param {Object} payload Contiene id_votacion y razon_cierre
+	 * @returns {Promise<Object>} Promesa con éxito de transacción
+	 */
+	async cerrarVotacion(payload) {
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error('No hay token de sesión.');
+
+		const response = await fetch(`${API_URL}/close_votacion.php`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify(payload),
+		});
+
+		const data = await response.json();
+		if (!response.ok) throw new Error(data.error || 'Error al cerrar la votación');
+
+		return data;
+	},
 };

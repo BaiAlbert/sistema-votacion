@@ -21,21 +21,26 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit(0);
 }
 
-// CONEXIÓN A BASE DE DATOS Y DEPENDENCIAS
+// Conexión a base de datos y dependencias
 require 'vendor/autoload.php';
+include_once 'config/db.php';
+
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-include_once 'config/db.php';
 $headers = getallheaders();
-$authHeader = $headers['Authorization'] ?? '';
+$authHeader = $headers['Authorization'] 
+           ?? $headers['authorization'] 
+           ?? $_SERVER['HTTP_AUTHORIZATION'] 
+           ?? '';
 
 if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
     http_response_code(401);
-    echo json_encode(["error" => "Token de formato inválido o ausente"]);
+    echo json_encode(["error" => "Token ausente o inválido"]);
     exit;
 }
 
@@ -53,12 +58,12 @@ try {
     exit;
 }
 
-// 2. Verificar Permisos
-// Un filtro rápido para expulsar a cualquiera que intente acceder al script de creación
-// sin tener el rol adecuado en su Token validado.
-if ($userRole !== 'admin_privado' && $userRole !== 'admin_gobierno') {
+// 2. Verificar Autenticación (se comprobarán los permisos detallados más adelante)
+// Cualquier usuario podría ser administrador de una organización, por lo que no
+// podemos bloquear la petición basándonos solo en su rol global.
+if (!$userId) {
     http_response_code(403);
-    echo json_encode(["error" => "No tienes permisos para crear votaciones"]);
+    echo json_encode(["error" => "No estás autorizado para crear votaciones"]);
     exit;
 }
 
@@ -103,7 +108,7 @@ $id_grupo = null;
 if ($tipo === 'gubernamental') {
     if ($userRole !== 'admin_gobierno') {
         http_response_code(403);
-        echo json_encode(["error" => "Un admin privado no puede crear votaciones gubernamentales"]);
+        echo json_encode(["error" => "No tienes el rol de admin_gobierno para crear este tipo de votaciones"]);
         exit;
     }
 
@@ -142,15 +147,15 @@ if ($tipo === 'privada') {
     }
 
     // Opcional: Podríamos verificar si el usuario es realmente admin_privado DE ESE GRUPO EN CONCRETO
-    // consultando la tabla usuarios_grupos. Lo implementamos por seguridad extra 
-    // para evitar que un admin intercepte el frontend enviando un ID de grupo ajeno.
-    $checkGrupoStmt = $conexion->prepare("SELECT rol_grupo FROM usuarios_grupos WHERE id_usuario = ? AND id_grupo = ? AND estado = 'aprobado'");
+    // consultando la tabla organizacion_miembros. Lo implementamos por seguridad extra 
+    // para evitar que un atacante intercepte el frontend enviando un ID de grupo ajeno.
+    $checkGrupoStmt = $conexion->prepare("SELECT es_admin FROM organizacion_miembros WHERE usuario_id = ? AND organizacion_id = ?");
     $checkGrupoStmt->execute([$userId, $id_grupo]);
     $userGroupRel = $checkGrupoStmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$userGroupRel || $userGroupRel['rol_grupo'] !== 'admin_privado') {
+    if (!$userGroupRel || $userGroupRel['es_admin'] != 1) {
         http_response_code(403);
-        echo json_encode(["error" => "No tienes permisos de administrador en este grupo específico"]);
+        echo json_encode(["error" => "No tienes permisos de administrador en esta organización específica"]);
         exit;
     }
 }

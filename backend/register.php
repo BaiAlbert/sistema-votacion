@@ -19,6 +19,7 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit(0);
 }
 
@@ -57,15 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $limites_stmt = $conexion->prepare("SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'usuarios'");
     $limites_stmt->execute([$db]);
 
-    // Volcamos los límites en un array donde la Clave es el nombre de la columna y el Valor es el límite numérico
-    $limites = $limites_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-    $max_email = $limites['email'] ?? 100;
-
     // Validar Email (dinámico)
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > $max_email) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100) {
         http_response_code(400);
-        echo json_encode(["error" => "El formato del correo es inválido o excede los $max_email caracteres"]);
+        echo json_encode(["error" => "El formato del correo es inválido o excede los 100 caracteres"]);
         exit;
     }
 
@@ -86,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["error" => "El nombre no puede contener números ni caracteres inválidos"]);
             exit;
         }
-        if (strlen($nombre) > $max_nombre) {
+        if (strlen($nombre) > 50) {
             http_response_code(400);
-            echo json_encode(["error" => "El nombre no puede exceder los $max_nombre caracteres"]);
+            echo json_encode(["error" => "El nombre no puede exceder los 50 caracteres"]);
             exit;
         }
     }
@@ -100,9 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["error" => "Los apellidos no pueden contener números ni caracteres inválidos"]);
             exit;
         }
-        if (strlen($apellidos) > $max_apellidos) {
+        if (strlen($apellidos) > 100) {
             http_response_code(400);
-            echo json_encode(["error" => "Los apellidos no pueden exceder los $max_apellidos caracteres"]);
+            echo json_encode(["error" => "Los apellidos no pueden exceder los 100 caracteres"]);
             exit;
         }
     }
@@ -121,9 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["error" => "La provincia no puede contener números ni caracteres inválidos"]);
             exit;
         }
-        if (strlen($provincia) > $max_provincia) {
+        if (strlen($provincia) > 50) {
             http_response_code(400);
-            echo json_encode(["error" => "La provincia no puede exceder los $max_provincia caracteres"]);
+            echo json_encode(["error" => "La provincia no puede exceder los 50 caracteres"]);
             exit;
         }
     }
@@ -135,9 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["error" => "La ciudad no puede contener números ni caracteres inválidos"]);
             exit;
         }
-        if (strlen($ciudad) > $max_ciudad) {
+        if (strlen($ciudad) > 50) {
             http_response_code(400);
-            echo json_encode(["error" => "La ciudad no puede exceder los $max_ciudad caracteres"]);
+            echo json_encode(["error" => "La ciudad no puede exceder los 50 caracteres"]);
             exit;
         }
     }

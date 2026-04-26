@@ -53,6 +53,45 @@ CREATE TABLE `usuarios_grupos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 
+-- 8. TABLA: organizaciones
+-- Almacena la información de empresas, sindicatos o comunidades.
+CREATE TABLE `organizaciones` (
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text,
+  `sede_ciudad` varchar(100),
+  `codigo_unico` varchar(8) UNIQUE NOT NULL COMMENT 'Código alfanumérico de 8 caracteres',
+  `creado_por` integer NOT NULL,
+  `fecha_creacion` timestamp DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`creado_por`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
+
+-- 9. TABLA: organizacion_miembros (Relación N:M)
+-- Gestiona la relación entre usuarios y organizaciones, indicando si son administradores.
+CREATE TABLE `organizacion_miembros` (
+  `organizacion_id` integer NOT NULL,
+  `usuario_id` integer NOT NULL,
+  `es_admin` boolean NOT NULL DEFAULT false,
+  `fecha_ingreso` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`organizacion_id`, `usuario_id`),
+  FOREIGN KEY (`organizacion_id`) REFERENCES `organizaciones` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
+
+-- 10. TABLA: organizacion_solicitudes
+-- Gestiona las peticiones pendientes para unirse a una organización.
+CREATE TABLE `organizacion_solicitudes` (
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `organizacion_id` integer NOT NULL,
+  `usuario_id` integer NOT NULL,
+  `pide_ser_admin` boolean NOT NULL DEFAULT false,
+  `estado` enum('pendiente', 'aceptada', 'denegada') NOT NULL DEFAULT 'pendiente',
+  `fecha_solicitud` timestamp DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`organizacion_id`) REFERENCES `organizaciones` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
+
+
 -- 4. TABLA: votaciones
 -- Almacena todas las votaciones realizadas en el sistema (tanto gubernamentales 
 -- como privadas). Incorpora el cierre manual y segmentación por alcance/grupo.
@@ -84,7 +123,7 @@ CREATE TABLE `votaciones` (
   `id_opcion_ganadora` integer DEFAULT NULL COMMENT 'Almacena la opción con más votos al finalizar',
   
   FOREIGN KEY (`id_autor`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`id_grupo`) REFERENCES `grupos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_grupo`) REFERENCES `organizaciones` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
 
 

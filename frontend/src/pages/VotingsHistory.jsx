@@ -142,7 +142,9 @@ export default function VotingsHistory() {
 										border: '1px solid rgba(16, 185, 129, 0.5)',
 									}}
 								>
-									FINALIZADA
+									{votacion.tipo === 'privada' && votacion.organizacion_nombre
+										? `FINALIZADA: ${votacion.organizacion_nombre.toUpperCase()}`
+										: 'FINALIZADA'}
 								</span>
 							</div>
 
@@ -156,6 +158,21 @@ export default function VotingsHistory() {
 							>
 								{votacion.descripcion || 'Sin descripción adicional.'}
 							</p>
+
+							{votacion.razon_cierre && (
+								<div style={{
+									backgroundColor: 'rgba(239, 68, 68, 0.1)',
+									borderLeft: '4px solid #ef4444',
+									padding: '1rem',
+									borderRadius: '0 8px 8px 0',
+									marginBottom: '1.5rem',
+								}}>
+									<p style={{ margin: 0, fontSize: '0.9rem', color: '#fca5a5' }}>
+										<strong style={{ color: '#ef4444' }}>Cierre Anticipado: </strong>
+										{votacion.razon_cierre}
+									</p>
+								</div>
+							)}
 
 							<div
 								style={{

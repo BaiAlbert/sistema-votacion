@@ -17,18 +17,18 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit(0);
 }
 
+// Conexión a base de datos y dependencias
 require 'vendor/autoload.php';
+include_once 'config/db.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-include_once 'config/db.php';
-
 $headers = getallheaders();
-// Para evitar problemas con cualquier tipo de proxy
 $authHeader = $headers['Authorization'] 
            ?? $headers['authorization'] 
            ?? $_SERVER['HTTP_AUTHORIZATION'] 
@@ -67,34 +67,35 @@ try {
     $provinciaUser = $userGeo['provincia'];
     $ciudadUser = $userGeo['ciudad'];
 
-    // Obtenemos los IDs de los grupos privados a los que el usuario pertenece y está aprobado
-    $stmtGrupos = $conexion->prepare("SELECT id_grupo FROM usuarios_grupos WHERE id_usuario = ? AND estado = 'aprobado'");
+    // Obtenemos los IDs de las organizaciones a las que el usuario pertenece
+    $stmtGrupos = $conexion->prepare("SELECT organizacion_id FROM organizacion_miembros WHERE usuario_id = ?");
     $stmtGrupos->execute([$userId]);
     $gruposIds = $stmtGrupos->fetchAll(PDO::FETCH_COLUMN); // Devuelve array plano [1, 5, 12]
 
     // Construimos dinámicamente el fragmento IN() para SQL, o dejarlo en fallback irrealizable si está vacío
     $gruposInstruccion = empty($gruposIds) ? "1=0" : "id_grupo IN (" . implode(',', array_fill(0, count($gruposIds), '?')) . ")";
 
-    // Montamos la consulta maestra de Votaciones Elegibles
+    // Montamos la consulta maestra de Votaciones Históricas
     // Condiciones: cerrada manualmente o fecha actual mayor a fecha_final
-    $sql = "SELECT id, titulo, descripcion, tipo, alcance, fecha_final, id_opcion_ganadora 
-            FROM votaciones 
-            WHERE (cerrada = 1 
-            OR NOW() > fecha_final)
+    $sql = "SELECT v.id, v.titulo, v.descripcion, v.tipo, v.alcance, v.fecha_final, v.id_opcion_ganadora, v.razon_cierre, v.cerrada, v.id_grupo, o.nombre as organizacion_nombre 
+            FROM votaciones v
+            LEFT JOIN organizaciones o ON v.id_grupo = o.id
+            WHERE (v.cerrada = 1 
+            OR NOW() > v.fecha_final)
             AND (
                 -- Caso 1: Votación Gubernamental Nacional
-                (tipo = 'gubernamental' AND alcance = 'nacional')
+                (v.tipo = 'gubernamental' AND v.alcance = 'nacional')
                 
                 -- Caso 2: Votación Gubernamental Provincial (coincide provincia)
-                OR (tipo = 'gubernamental' AND alcance = 'provincial' AND provincia_target = ?)
+                OR (v.tipo = 'gubernamental' AND v.alcance = 'provincial' AND v.provincia_target = ?)
                 
                 -- Caso 3: Votación Gubernamental Local (coincide provincia y ciudad)
-                OR (tipo = 'gubernamental' AND alcance = 'local' AND provincia_target = ? AND ciudad_target = ?)
+                OR (v.tipo = 'gubernamental' AND v.alcance = 'local' AND v.provincia_target = ? AND v.ciudad_target = ?)
                 
                 -- Caso 4: Votación Privada (ID de grupo coincide con los aprobados del usuario)
-                OR (tipo = 'privada' AND $gruposInstruccion)
+                OR (v.tipo = 'privada' AND v.$gruposInstruccion)
             )
-            ORDER BY fecha_final ASC";
+            ORDER BY v.fecha_final DESC";
 
     $stmtVotaciones = $conexion->prepare($sql);
 

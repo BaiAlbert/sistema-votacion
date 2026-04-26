@@ -19,15 +19,16 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit(0);
 }
 
 // CONEXIÓN A BASE DE DATOS Y DEPENDENCIAS
 require 'vendor/autoload.php';
+include_once 'config/db.php';
+
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-
-include_once 'config/db.php';
 
 // Verificamos el token
 $input = json_decode(file_get_contents('php://input'), true);

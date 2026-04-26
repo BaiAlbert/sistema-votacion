@@ -1,15 +1,15 @@
 <?php
 /**
- * Endpoint para obtener los Votaciones de un Admin Privado
+ * Endpoint para obtener las organizaciones a las que pertenece el usuario
  *
- * Devuelve un array JSON con los IDs y los Nombres de las organizaciones/grupos
- * en los que el usuario logueado actualmente figura como 'admin_privado'.
+ * Devuelve un array JSON con los detalles de las organizaciones y el rol del usuario en ellas.
+ * Si el usuario es admin, devolverá también el codigo_unico.
  *
  * @api
  * @method GET
  */
 
-// CONFIGURACIÓN CORS (Debe ir lo primerísimo)
+// CONFIGURACIÓN CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
@@ -41,48 +41,43 @@ if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
 
 $token = $matches[1];
 $userId = null;
-$userRole = null;
 
 try {
-    // Verificamos si la firma criptográfica es auténtica usando el token $jwt_secret
     $decoded = JWT::decode($token, new Key($jwt_secret, 'HS512'));
-    $userId = $decoded->data->id ?? null; // Sacamos el ID oculto dentro del Token
-    $userRole = $decoded->data->rol ?? null; // Sacamos el Rol ocultado dentro del Token
+    $userId = $decoded->data->id ?? null;
 } catch (Exception $e) {
     http_response_code(401);
     echo json_encode(["error" => "Token inválido o expirado"]);
     exit;
 }
 
-// Medida Defensiva: Solo los usuarios identificados pueden llegar hasta aquí.
 if (!$userId) {
     http_response_code(403);
-    echo json_encode(["error" => "No tienes permisos para realizar esta acción"]);
+    echo json_encode(["error" => "Usuario no identificado"]);
     exit;
 }
 
 try {
-    // Preparamos una consulta "INNER JOIN" masiva:
-    // "Junta la tabla de Organizaciones (O) con la tabla de Organizacion_Miembros (OM)
-    // donde ambas compartan el ID. Luego fíltralo TODO para mostrarme solamente
-    // aquellas filas donde el ID de usuario coincida con la persona logueada (:id_usuario),
-    // y tenga el cargo de administrador (es_admin = 1)."
-    $query = "SELECT o.id, o.nombre 
+    $query = "SELECT 
+                o.id, 
+                o.nombre, 
+                o.descripcion, 
+                o.sede_ciudad,
+                o.creado_por,
+                om.es_admin,
+                CASE WHEN om.es_admin = 1 THEN o.codigo_unico ELSE NULL END as codigo_unico
               FROM organizaciones o 
               INNER JOIN organizacion_miembros om ON o.id = om.organizacion_id 
-              WHERE om.usuario_id = :id_usuario 
-              AND om.es_admin = 1";
+              WHERE om.usuario_id = :id_usuario";
 
     $stmt = $conexion->prepare($query);
-    // Bind Param vincula la variable a la consulta MySQL de forma segura para evadir hacking (Inyección SQL)
     $stmt->bindParam(':id_usuario', $userId);
     $stmt->execute();
 
-    // Volcamos todas las filas en un gran array asociativo en PHP
-    $grupos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $organizaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     http_response_code(200);
-    echo json_encode(["grupos" => $grupos]);
+    echo json_encode(["organizaciones" => $organizaciones]);
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["error" => "Error de base de datos: " . $e->getMessage()]);

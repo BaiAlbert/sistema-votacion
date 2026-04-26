@@ -23,7 +23,7 @@ export function Body() {
 		cursor: 'default',
 	};
 
-	const isAdmin = user && (user.rol === 'admin_privado' || user.rol === 'admin_gobierno');
+	const isAdmin = !!user;
 
 	return (
 		<main style={estiloMainBody}>

@@ -16,7 +16,7 @@ services:
             - db_data_local:/var/lib/mysql
             # Autocarga de esquemas y datos mockeados (igual que en producción)
             - ./database/1_esquema_db.sql:/docker-entrypoint-initdb.d/1_esquema_db.sql
-            - ./database/2_mock_data.sql:/docker-entrypoint-initdb.d/2_mock_data.sql
+            - ./database/3_mock_data_generated.sql:/docker-entrypoint-initdb.d/3_mock_data_generated.sql
 
     # 2. Backend (API PHP)
     backend:

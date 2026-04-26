@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './Button';
+import { OrgActions } from './OrgActions';
 
 /**
  * Componente de Header
@@ -41,6 +42,7 @@ export function Header({ titulo }) {
 	const estiloNav = {
 		display: 'flex',
 		gap: '1rem',
+		alignItems: 'center',
 	};
 
 	return (
@@ -53,7 +55,8 @@ export function Header({ titulo }) {
 				{/* Renderizado condicional: Si hay usuario, mostramos "Cerrar Sesión", si no "Iniciar Sesión" */}
 				{user ? (
 					<>
-						<p>Bienvenido, {user.nombre} {user.apellidos}</p>
+						<p style={{ margin: 0, marginRight: '1rem' }}>Bienvenido, {user.nombre}</p>
+						<OrgActions />
 						<Button
 							onClick={() => {
 								logout(); // Limpia el estado global

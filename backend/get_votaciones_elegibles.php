@@ -19,18 +19,18 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit(0);
 }
 
+// Conexión a base de datos y dependencias
 require 'vendor/autoload.php';
+include_once 'config/db.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-include_once 'config/db.php';
-
 $headers = getallheaders();
-// Para evitar problemas con cualquier tipo de proxy
 $authHeader = $headers['Authorization'] 
            ?? $headers['authorization'] 
            ?? $_SERVER['HTTP_AUTHORIZATION'] 
@@ -69,10 +69,17 @@ try {
     $provinciaUser = $userGeo['provincia'];
     $ciudadUser = $userGeo['ciudad'];
 
-    // 2. Obtener los IDs de los grupos privados a los que el usuario pertenece y está aprobado
-    $stmtGrupos = $conexion->prepare("SELECT id_grupo FROM usuarios_grupos WHERE id_usuario = ? AND estado = 'aprobado'");
+    // 2. Obtener los IDs y permisos de las organizaciones a las que el usuario pertenece
+    $stmtGrupos = $conexion->prepare("SELECT organizacion_id, es_admin FROM organizacion_miembros WHERE usuario_id = ?");
     $stmtGrupos->execute([$userId]);
-    $gruposIds = $stmtGrupos->fetchAll(PDO::FETCH_COLUMN); // Devuelve array plano [1, 5, 12]
+    $userGrupos = $stmtGrupos->fetchAll(PDO::FETCH_ASSOC); 
+    
+    $gruposIds = [];
+    $adminMap = []; // organizacion_id => es_admin boolean
+    foreach ($userGrupos as $g) {
+        $gruposIds[] = $g['organizacion_id'];
+        $adminMap[$g['organizacion_id']] = $g['es_admin'] == 1;
+    }
 
     // Construir dinámicamente el fragmento IN() para SQL, o dejarlo en fallback irrealizable si está vacío
     $gruposInstruccion = empty($gruposIds) ? "1=0" : "id_grupo IN (" . implode(',', array_fill(0, count($gruposIds), '?')) . ")";
@@ -80,24 +87,25 @@ try {
     // 3. Montar la consulta maestra de Votaciones Elegibles
     // Condiciones universales: fecha actual menor o igual a fecha_final y no cerrada manualmente.
     // Opcionalmente, exigimos que ya hayan empezado (NOW >= fecha_inicio).
-    $sql = "SELECT id, titulo, descripcion, tipo, alcance, fecha_final 
-            FROM votaciones 
-            WHERE cerrada = 0 
-            AND NOW() BETWEEN fecha_inicio AND fecha_final
+    $sql = "SELECT v.id, v.titulo, v.descripcion, v.tipo, v.alcance, v.fecha_final, v.id_grupo, o.nombre as organizacion_nombre 
+            FROM votaciones v
+            LEFT JOIN organizaciones o ON v.id_grupo = o.id
+            WHERE v.cerrada = 0 
+            AND NOW() BETWEEN v.fecha_inicio AND v.fecha_final
             AND (
                 -- Caso 1: Votación Gubernamental Nacional
-                (tipo = 'gubernamental' AND alcance = 'nacional')
+                (v.tipo = 'gubernamental' AND v.alcance = 'nacional')
                 
                 -- Caso 2: Votación Gubernamental Provincial (coincide provincia)
-                OR (tipo = 'gubernamental' AND alcance = 'provincial' AND provincia_target = ?)
+                OR (v.tipo = 'gubernamental' AND v.alcance = 'provincial' AND v.provincia_target = ?)
                 
                 -- Caso 3: Votación Gubernamental Local (coincide provincia y ciudad)
-                OR (tipo = 'gubernamental' AND alcance = 'local' AND provincia_target = ? AND ciudad_target = ?)
+                OR (v.tipo = 'gubernamental' AND v.alcance = 'local' AND v.provincia_target = ? AND v.ciudad_target = ?)
                 
                 -- Caso 4: Votación Privada (ID de grupo coincide con los aprobados del usuario)
-                OR (tipo = 'privada' AND $gruposInstruccion)
+                OR (v.tipo = 'privada' AND v.$gruposInstruccion)
             )
-            ORDER BY fecha_final ASC";
+            ORDER BY v.fecha_final ASC";
 
     $stmtVotaciones = $conexion->prepare($sql);
 
@@ -127,6 +135,12 @@ try {
             // ¿El usuario ya votó en esta elección?
             $stmtCheckVoto->execute([$vid, $userId]);
             $votacion['hasVoted'] = $stmtCheckVoto->fetch() ? true : false;
+
+            // ¿Es administrador de la organización?
+            $votacion['es_admin_org'] = false;
+            if ($votacion['tipo'] === 'privada' && isset($votacion['id_grupo'])) {
+                $votacion['es_admin_org'] = $adminMap[$votacion['id_grupo']] ?? false;
+            }
 
             // Conseguir las candidaturas/opciones
             $stmtOpciones->execute([$vid]);
