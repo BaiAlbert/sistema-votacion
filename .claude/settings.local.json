@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py scripts/generate_mock_data.py)",
+      "Bash(py -c \"import sys; print\\(sys.getdefaultencoding\\(\\)\\)\")",
+      "Bash(python -c \"with open\\('generate_mock_data.py', 'rb'\\) as f: content = f.read\\(\\); print\\('Has BOM:', b'\\\\\\\\xef\\\\\\\\xbb\\\\\\\\xbf' in content[:3]\\)\")",
+      "Bash(py *)"
+    ]
+  }
+}
