@@ -109,9 +109,23 @@ try {
     $stmtCenso = $conexion->prepare("INSERT INTO votos_registrados (id_votacion, id_usuario) VALUES (?, ?)");
     $stmtCenso->execute([$id_votacion, $userId]);
 
-    // 3.2 Crear una firma criptográfica única representativa de la inserción de esta papeleta.
-    // Usamos uniqid mixto para dar una ilusión de blockchain simple a modo de firma digital secreta.
-    $hashIntegridad = password_hash(uniqid("voto_$id_votacion", true), PASSWORD_BCRYPT);
+    // 3.2 SISTEMA DE INTEGRIDAD BLOCKCHAIN (Cifrado en cadena)
+    // A) Obtenemos el hash del ÚLTIMO voto emitido en esta urna específica
+    // Bloqueamos la fila con FOR UPDATE para evitar colisiones si 2 personas votan en el mismo milisegundo
+    $stmtLastHash = $conexion->prepare("SELECT hash_integridad FROM votos_anonimos WHERE id_votacion = ? ORDER BY id DESC LIMIT 1 FOR UPDATE");
+    $stmtLastHash->execute([$id_votacion]);
+    $lastHashRow = $stmtLastHash->fetch(PDO::FETCH_ASSOC);
+
+    // Si es el primer voto de la elección, creamos un "Hash Génesis"
+    $previousHash = $lastHashRow ? $lastHashRow['hash_integridad'] : hash('sha256', "genesis_votacion_" . $id_votacion);
+
+    // B) Sellamos criptográficamente el voto actual
+    // Concatenamos: ID Votación + ID Opción + Hash Anterior
+    $datosPapeleta = $id_votacion . "_" . $id_opcion . "_" . $previousHash;
+    
+    // C) Firmamos los datos usando HMAC y el secreto del servidor ($jwt_secret o $dni_pepper)
+    // Esto evita que un DBA recalcule la cadena offline, ya que no conoce el secreto de las variables de entorno de Docker.
+    $hashIntegridad = hash_hmac('sha256', $datosPapeleta, $jwt_secret);
 
     // 3.3 Insertar el voto físico anónimo ("Urna")
     $stmtUrna = $conexion->prepare("INSERT INTO votos_anonimos (id_votacion, id_opcion, hash_integridad) VALUES (?, ?, ?)");

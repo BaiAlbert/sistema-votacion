@@ -102,7 +102,11 @@ try {
     $stmtClose = $conexion->prepare("UPDATE votaciones SET cerrada = 1, razon_cierre = ? WHERE id = ?");
     $stmtClose->execute([$razon_cierre, $id_votacion]);
 
-    // 4. Calcular el ganador (opcional pero recomendable al cerrar)
+    // 4 Auditar la votación en el momento que la cerramos
+    require_once 'service_integridad.php';
+    IntegridadService::auditar($id_votacion, $conexion, $jwt_secret);
+
+    // 5. Calcular el ganador (opcional pero recomendable al cerrar)
     // Contar los votos por opción
     $stmtCount = $conexion->prepare("
         SELECT id_opcion, COUNT(*) as total 

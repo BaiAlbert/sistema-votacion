@@ -52,12 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provincia = $input['provincia'] ?? '';
     $ciudad = $input['ciudad'] ?? '';
 
-    // Obtenemos los límites de caracteres dinámicamente desde la base de datos para no "harcodear"
-    // Esto significa que si luego cambiamos el VARCHAR en MySQL, el PHP se adaptará solo.
-    // $db (nombre de la base de datos) viene incluido desde config/db.php
-    $limites_stmt = $conexion->prepare("SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'usuarios'");
-    $limites_stmt->execute([$db]);
-
     // Validar Email (dinámico)
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100) {
         http_response_code(400);

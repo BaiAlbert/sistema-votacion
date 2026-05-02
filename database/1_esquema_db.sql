@@ -121,6 +121,8 @@ CREATE TABLE `votaciones` (
   `cerrada` boolean NOT NULL DEFAULT false COMMENT 'True si ha sido cerrada manualmente por un admin antes de tiempo',
   `razon_cierre` text COMMENT 'Explicación de por qué se clausuró prematuramente',
   `id_opcion_ganadora` integer DEFAULT NULL COMMENT 'Almacena la opción con más votos al finalizar',
+  `estado_auditoria` enum('pendiente', 'integra', 'corrupta') NOT NULL DEFAULT 'pendiente',
+  `fecha_auditoria` timestamp NULL DEFAULT NULL,
   
   FOREIGN KEY (`id_autor`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_grupo`) REFERENCES `organizaciones` (`id`) ON DELETE CASCADE
@@ -173,7 +175,49 @@ CREATE TABLE `votos_anonimos` (
   `id_votacion` integer NOT NULL,
   `id_opcion` integer NOT NULL,
   `hash_integridad` varchar(255) UNIQUE COMMENT 'Firma blockchain/cryptografica para detectar manipulaciones en la BBDD',
-  `fecha_voto` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`id_votacion`) REFERENCES `votaciones` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_opcion`) REFERENCES `opciones` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_es_0900_ai_ci;
+
+
+-- TRIGGERS ANTI-MANIPULACIÓN
+DELIMITER //
+
+-- 1. Vigilar los UPDATES, el cambiazo
+-- Cualquier modificación de un voto, sea cuando sea, es sospechosa.
+CREATE TRIGGER chivato_update_votos
+AFTER UPDATE ON votos_anonimos
+FOR EACH ROW
+BEGIN
+    UPDATE votaciones 
+    SET estado_auditoria = 'pendiente' 
+    WHERE id = NEW.id_votacion; 
+END;
+//
+
+-- 2. Vigilar los DELETES, borrado de papeletas
+-- Cualquier borrado de un voto, sea cuando sea, es sospechoso.
+CREATE TRIGGER chivato_delete_votos
+AFTER DELETE ON votos_anonimos
+FOR EACH ROW
+BEGIN
+    -- Usamos OLD porque la fila acaba de ser borrada, NEW ya no existe.
+    UPDATE votaciones 
+    SET estado_auditoria = 'pendiente' 
+    WHERE id = OLD.id_votacion;
+END;
+//
+
+-- 3. Vigilar los INSERTS con la urna cerrada
+-- Los inserts son normales, excepto si la votación ya ha cerrado.
+CREATE TRIGGER chivato_insert_votos
+AFTER INSERT ON votos_anonimos
+FOR EACH ROW
+BEGIN
+    UPDATE votaciones 
+    SET estado_auditoria = 'pendiente' 
+    WHERE id = NEW.id_votacion AND (cerrada = 1 OR NOW() > fecha_final);
+END;
+//
+
+DELIMITER ;

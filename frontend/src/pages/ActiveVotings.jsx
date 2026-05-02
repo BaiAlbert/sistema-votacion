@@ -222,9 +222,21 @@ export default function ActiveVotings() {
 									justifyContent: 'space-between',
 									alignItems: 'flex-start',
 									marginBottom: '1rem',
+									gap: '15px',
+									flexWrap: 'wrap',
 								}}
 							>
-								<h3 style={{ margin: 0, color: '#38bdf8', fontSize: '1.4rem' }}>{votacion.titulo}</h3>
+								<h3
+									style={{
+										margin: 0,
+										color: '#38bdf8',
+										fontSize: '1.4rem',
+										flex: '1 1 250px',
+										wordBreak: 'break-word',
+									}}
+								>
+									{votacion.titulo}
+								</h3>
 								<span
 									style={{
 										fontSize: '0.8rem',
@@ -233,6 +245,7 @@ export default function ActiveVotings() {
 										borderRadius: '20px',
 										color: '#38bdf8',
 										border: '1px solid rgba(56, 189, 248, 0.5)',
+										flexShrink: 0,
 									}}
 								>
 									{votacion.tipo === 'privada' && votacion.organizacion_nombre

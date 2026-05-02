@@ -72,12 +72,20 @@ try {
     $stmtGrupos->execute([$userId]);
     $gruposIds = $stmtGrupos->fetchAll(PDO::FETCH_COLUMN); // Devuelve array plano [1, 5, 12]
 
+    // Buscar votaciones cerradas o finalizadas que aún estén pendientes de auditar
+    require_once 'service_integridad.php';
+    $stmtAuditPending = $conexion->query("SELECT id FROM votaciones WHERE (cerrada = 1 OR NOW() > fecha_final) AND estado_auditoria = 'pendiente'");
+    $pendingToAudit = $stmtAuditPending->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($pendingToAudit as $vidToAudit) {
+        IntegridadService::auditar($vidToAudit, $conexion, $jwt_secret);
+    }
+
     // Construimos dinámicamente el fragmento IN() para SQL, o dejarlo en fallback irrealizable si está vacío
-    $gruposInstruccion = empty($gruposIds) ? "1=0" : "id_grupo IN (" . implode(',', array_fill(0, count($gruposIds), '?')) . ")";
+    $gruposInstruccion = empty($gruposIds) ? "1=0" : "v.id_grupo IN (" . implode(',', array_fill(0, count($gruposIds), '?')) . ")";
 
     // Montamos la consulta maestra de Votaciones Históricas
     // Condiciones: cerrada manualmente o fecha actual mayor a fecha_final
-    $sql = "SELECT v.id, v.titulo, v.descripcion, v.tipo, v.alcance, v.fecha_final, v.id_opcion_ganadora, v.razon_cierre, v.cerrada, v.id_grupo, o.nombre as organizacion_nombre 
+    $sql = "SELECT v.id, v.titulo, v.descripcion, v.tipo, v.alcance, v.fecha_final, v.id_opcion_ganadora, v.razon_cierre, v.cerrada, v.id_grupo, v.estado_auditoria, o.nombre as organizacion_nombre 
             FROM votaciones v
             LEFT JOIN organizaciones o ON v.id_grupo = o.id
             WHERE (v.cerrada = 1 
@@ -93,7 +101,7 @@ try {
                 OR (v.tipo = 'gubernamental' AND v.alcance = 'local' AND v.provincia_target = ? AND v.ciudad_target = ?)
                 
                 -- Caso 4: Votación Privada (ID de grupo coincide con los aprobados del usuario)
-                OR (v.tipo = 'privada' AND v.$gruposInstruccion)
+                OR (v.tipo = 'privada' AND $gruposInstruccion)
             )
             ORDER BY v.fecha_final DESC";
 

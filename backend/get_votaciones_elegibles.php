@@ -82,7 +82,7 @@ try {
     }
 
     // Construir dinámicamente el fragmento IN() para SQL, o dejarlo en fallback irrealizable si está vacío
-    $gruposInstruccion = empty($gruposIds) ? "1=0" : "id_grupo IN (" . implode(',', array_fill(0, count($gruposIds), '?')) . ")";
+    $gruposInstruccion = empty($gruposIds) ? "1=0" : "v.id_grupo IN (" . implode(',', array_fill(0, count($gruposIds), '?')) . ")";
 
     // 3. Montar la consulta maestra de Votaciones Elegibles
     // Condiciones universales: fecha actual menor o igual a fecha_final y no cerrada manualmente.
@@ -103,7 +103,7 @@ try {
                 OR (v.tipo = 'gubernamental' AND v.alcance = 'local' AND v.provincia_target = ? AND v.ciudad_target = ?)
                 
                 -- Caso 4: Votación Privada (ID de grupo coincide con los aprobados del usuario)
-                OR (v.tipo = 'privada' AND v.$gruposInstruccion)
+                OR (v.tipo = 'privada' AND $gruposInstruccion)
             )
             ORDER BY v.fecha_final ASC";
 
