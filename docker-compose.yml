@@ -121,6 +121,7 @@ services:
             - db_password
             - jwt_secret
             - dni_pepper
+            - blockchain_secret
         networks:
             - votacion_net
         deploy:
@@ -231,6 +232,8 @@ secrets:
     jwt_secret:
         external: true
     dni_pepper:
+        external: true
+    blockchain_secret:
         external: true
 
 networks:

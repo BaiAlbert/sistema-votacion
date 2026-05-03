@@ -1,3 +1,5 @@
+<?php
+
 // Definimos que orígenes son "buenos" (Lista blanca de orígenes)
 $origenes_permitidos = [
     'http://localhost:3000', // Para desarrollo en local

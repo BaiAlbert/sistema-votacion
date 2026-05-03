@@ -123,9 +123,9 @@ try {
     // Concatenamos: ID Votación + ID Opción + Hash Anterior
     $datosPapeleta = $id_votacion . "_" . $id_opcion . "_" . $previousHash;
     
-    // C) Firmamos los datos usando HMAC y el secreto del servidor ($jwt_secret o $dni_pepper)
+    // C) Firmamos los datos usando HMAC y el secreto del servidor ($blockchain_secret)
     // Esto evita que un DBA recalcule la cadena offline, ya que no conoce el secreto de las variables de entorno de Docker.
-    $hashIntegridad = hash_hmac('sha256', $datosPapeleta, $jwt_secret);
+    $hashIntegridad = hash_hmac('sha256', $datosPapeleta, $blockchain_secret);
 
     // 3.3 Insertar el voto físico anónimo ("Urna")
     $stmtUrna = $conexion->prepare("INSERT INTO votos_anonimos (id_votacion, id_opcion, hash_integridad) VALUES (?, ?, ?)");

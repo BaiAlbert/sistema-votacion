@@ -29,12 +29,14 @@ services:
             DB_HOST: db
             DB_NAME: db_appvotaciones
             DB_USER: user_appvotaciones
-            DB_PASSWORD: 1234 # Reemplaza el uso de secretos por variable plana
-            JWT_SECRET: zhQYaPDmP01q2DOMPHdfVF6ne5eb84xlD1XVjLQoFTTzCHFUHVCKCwB1MF98y5VUVvIab7SQ57JPlVQNmd1tNe
-            DNI_PEPPER: 6234d7de184292ef59a0cf23089445b41c00e0504659889a9a304eff2e65fac1
+            # Secretos en texto plano para facilitar el desarrollo local
+            DB_PASSWORD: 1234
+            JWT_SECRET: c579f2c9818dd0fafec7022c1ce80bfc1dba7cfa09b1650c84eb379e2a8d4a89b28f7ce89e81a6b62f740a01975708ec2e8621057fb329bc9d58370c1e73abd3
+            DNI_PEPPER: 6b8821901f9587a0d33aa0dec880d2a78ccf3f9adca2523b228135d0c71ac4c5
+            BLOCKCHAIN_SECRET: 83299ee1bd7515afe3503044ceb2378952210d1d6ef4d2ac600a618ad61bb340
         volumes:
-            # TRUCO DE MAGIA: Montamos tu código local dentro del contenedor.
-            # Así, si editas un archivo PHP, cambia al instante sin reiniciar.
+            # Montamos el código local dentro del contenedor.
+            # Así si un archivo PHP es editado cambia al instante sin reiniciar.
             - ./backend:/var/www/html
             - /var/www/html/vendor
 

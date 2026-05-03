@@ -16,8 +16,8 @@ from faker import Faker
 fake = Faker('es_ES')
 
 # Constantes de Seguridad y Configuración
-DNI_PEPPER = "6234d7de184292ef59a0cf23089445b41c00e0504659889a9a304eff2e65fac1"
-JWT_SECRET = "zhQYaPDmP01q2DOMPHdfVF6ne5eb84xlD1XVjLQoFTTzCHFUHVCKCwB1MF98y5VUVvIab7SQ57JPlVQNmd1tNe" # Mismo secreto que en el backend
+DNI_PEPPER = "6b8821901f9587a0d33aa0dec880d2a78ccf3f9adca2523b228135d0c71ac4c5"
+BLOCKCHAIN_SECRET = "83299ee1bd7515afe3503044ceb2378952210d1d6ef4d2ac600a618ad61bb340"
 PASSWORD_PLAIN = "123456"
 
 # Optimización: Como todos los usuarios tendrán la misma contraseña plana,
@@ -303,7 +303,7 @@ def main():
             id_opcion = random.choice(opciones_votacion)
             
             datos_papeleta = f"{i}_{id_opcion}_{previous_hash}"
-            hash_integridad = hmac.new(JWT_SECRET.encode('utf-8'), datos_papeleta.encode('utf-8'), hashlib.sha256).hexdigest()
+            hash_integridad = hmac.new(BLOCKCHAIN_SECRET.encode('utf-8'), datos_papeleta.encode('utf-8'), hashlib.sha256).hexdigest()
             
             votos_anonimos_sql.append(f"({i}, {id_opcion}, {escape_sql(hash_integridad)})")
             

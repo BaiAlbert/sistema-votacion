@@ -12,10 +12,10 @@ class IntegridadService {
      *
      * @param int $id_votacion El ID de la votación a auditar.
      * @param PDO $conexion Conexión activa a la base de datos.
-     * @param string $jwt_secret Secreto usado para firmar los hashes HMAC.
+     * @param string $blockchain_secret Secreto usado para firmar los hashes HMAC.
      * @return bool True si la cadena es íntegra, False si está corrupta.
      */
-    public static function auditar($id_votacion, $conexion, $jwt_secret) {
+    public static function auditar($id_votacion, $conexion, $blockchain_secret) {
         try {
             // Obtenemos todos los votos de esta votación ordenados cronológicamente por ID
             $stmt = $conexion->prepare("SELECT id, id_opcion, hash_integridad FROM votos_anonimos WHERE id_votacion = ? ORDER BY id ASC");
@@ -35,7 +35,7 @@ class IntegridadService {
             foreach ($votos as $voto) {
                 // Re-calculamos la firma tal como debería haberse creado en votar.php
                 $datosPapeleta = $id_votacion . "_" . $voto['id_opcion'] . "_" . $hash_esperado;
-                $hash_calculado = hash_hmac('sha256', $datosPapeleta, $jwt_secret);
+                $hash_calculado = hash_hmac('sha256', $datosPapeleta, $blockchain_secret);
 
                 // Verificamos si la firma registrada coincide con la calculada
                 if ($hash_calculado !== $voto['hash_integridad']) {

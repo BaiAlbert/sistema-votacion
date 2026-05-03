@@ -86,6 +86,11 @@ if ! docker secret ls | grep -qw "dni_pepper"; then
     openssl rand -hex 32 | docker secret create dni_pepper -
 fi
 
+if ! docker secret ls | grep -qw "blockchain_secret"; then
+    echo "Creando secreto blockchain_secret..."
+    openssl rand -hex 32 | docker secret create blockchain_secret -
+fi
+
 # 6. Compilación y subida de imágenes
 # echo "Compilando y subiendo la Base de Datos..."
 # docker build -t $REGISTRY/votacion-db-galera:latest ./database

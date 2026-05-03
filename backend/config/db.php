@@ -18,6 +18,7 @@ $user = $_ENV['DB_USER'];
 $pass = file_exists('/run/secrets/db_password') ? trim(file_get_contents('/run/secrets/db_password')) : $_ENV['DB_PASSWORD'];
 $jwt_secret = file_exists('/run/secrets/jwt_secret') ? trim(file_get_contents('/run/secrets/jwt_secret')) : $_ENV['JWT_SECRET'];
 $dni_pepper = file_exists('/run/secrets/dni_pepper') ? trim(file_get_contents('/run/secrets/dni_pepper')) : $_ENV['DNI_PEPPER'];
+$blockchain_secret = file_exists('/run/secrets/blockchain_secret') ? trim(file_get_contents('/run/secrets/blockchain_secret')) : $_ENV['BLOCKCHAIN_SECRET'];
 
 // Creamos la conexión usando PDO
 try {
