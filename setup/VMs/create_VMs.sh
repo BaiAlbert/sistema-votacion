@@ -18,13 +18,13 @@ VBOX="vboxmanage" # En Ubuntu, vboxmanage se llama en minúsculas y está en el 
 # Lista de las 4 máquinas que vamos a crear
 VM_NAMES=("Test-App_Manager" "Test-App_DB" "Test-App_Worker1" "Test-App_Worker2")
 
-# PASO 1: Pedir al usuario la ISO de Ubuntu Server 24 LTS
+# PASO 1: Pedir al usuario la ISO de Ubuntu Server 26 LTS
 echo -e "${CYAN}Abriendo asistente para la ISO de Ubuntu...${RESET}"
-echo -e "Por favor, indica la ruta de la ISO de Ubuntu Server 24 LTS (Se usará para todas las VMs)."
+echo -e "Por favor, indica la ruta de la ISO de Ubuntu Server 26 LTS (Se usará para todas las VMs)."
 
 # Bucle para asegurar que el usuario mete una ruta válida
 while true; do
-    read -p "Ruta completa de la ISO (ej. /home/tu_usuario/Descargas/ubuntu-24.04.iso): " ISO_PATH
+    read -p "Ruta completa de la ISO (ej. /home/tu_usuario/Descargas/ubuntu-26.04.iso): " ISO_PATH
     
     # Comprobar si el archivo existe (-f)
     if [[ -f "$ISO_PATH" ]]; then
@@ -61,6 +61,7 @@ for NAME in "${VM_NAMES[@]}"; do
     # Lector CD/DVD con la ISO ya montada
     $VBOX storagectl "$NAME" --name "IDE" --add ide
     $VBOX storageattach "$NAME" --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "$ISO_PATH"
+    $VBOX storageattach "$NAME" --storagectl "IDE" --port 1 --device 1 --type dvddrive --medium "..\cloud-init\seed_$NAME.iso"
 
     echo -e "${GREEN}$NAME está lista.${RESET}"
 done

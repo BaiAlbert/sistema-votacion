@@ -9,10 +9,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# El usuario con el que se conecta por SSH a las otras máquinas
 USUARIO="alberto-ramirez" 
-WORKERS=("192.168.50.2" "192.168.50.3" "192.168.50.4")
 
-echo "Iniciando el despliegue automático del archivo de repositorios locales (Registry)..."
+# La IP de la máquina principal
+MANAGER_IP="192.168.1.250"
+
+# Lista de IPs de los workers
+WORKERS=("192.168.1.249" "192.168.1.248" "192.168.1.247")
+
+echo "1. Despliegue automático del archivo de repositorios locales (Registry local)..."
 
 # 3. Comprobación interactiva del contenedor
 # Buscamos si ya existe un contenedor llamado exactamente "repositorios"
@@ -33,20 +39,20 @@ fi
 
 # 4. Configurar Docker en el Manager local
 echo ""
-echo "Configurando Docker local para permitir el registry inseguro en 192.168.50.1:5000..."
+echo "2. Configurando Docker local para permitir el registry inseguro en $MANAGER_IP:5000..."
 mkdir -p /etc/docker
 tee /etc/docker/daemon.json > /dev/null <<EOF
 {
-    "insecure-registries" : ["192.168.50.1:5000"]
+    "insecure-registries" : ["$MANAGER_IP:5000"]
 }
 EOF
 
-echo "Reiniciando el servicio de Docker local para aplicar cambios..."
+echo "3. Reiniciando el servicio de Docker local para aplicar los cambios..."
 systemctl restart docker
 
 # 5. Inyectar la configuración en los Workers remotos por SSH
 echo ""
-echo "Enviando la configuración de Docker a los Workers remotos..."
+echo "4. Enviando la configuración de Docker a los Workers remotos..."
 echo "ATENCIÓN: Te pedirá la contraseña de $USUARIO para el sudo en cada máquina."
 
 for IP in "${WORKERS[@]}"; do
@@ -58,7 +64,7 @@ for IP in "${WORKERS[@]}"; do
         sudo mkdir -p /etc/docker &&
         sudo tee /etc/docker/daemon.json > /dev/null <<'REMOTE_EOF'
 {
-    \"insecure-registries\" : [\"192.168.50.1:5000\"]
+    \"insecure-registries\" : [\"$MANAGER_IP:5000\"]
 }
 REMOTE_EOF
         sudo systemctl restart docker
@@ -67,8 +73,8 @@ done
 
 # 6. Lanzar el Registry local
 echo ""
-echo "Desplegando el contenedor del Registry en el Manager..."
+echo "5. Desplegando el contenedor del Registry en el Manager..."
 docker run -d -p 5000:5000 --restart=always --name repositorios registry:latest
 
 echo ""
-echo "Registry local desplegado y nodos configurados para permitir el registry en 192.168.50.1:5000"
+echo "Registry local desplegado y nodos configurados para permitir el registry en $MANAGER_IP:5000"

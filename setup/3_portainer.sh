@@ -9,12 +9,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-echo "Iniciando el despliegue automático de Portainer..."
+echo "1. Iniciando el despliegue automático de Portainer..."
 
 # Preguntar al usuario sobre el origen del archivo YAML
 echo "¿Como deseas instalar Portainer?"
-echo "1. Descargar el setup desde el enlace oficial"
-echo "2. Usar la versión local (en caso de que la descarga falle usa esta opción)"
+echo "1) Descargar el setup desde el enlace oficial"
+echo "2) Usar la versión local (en caso de que la descarga falle usa esta opción)"
 read -p "Elige una opción (1 o 2): " opcion_yaml
 
 # 3. Usar el directorio temporal (/tmp). Así no ensuciamos el /home de ningún usuario.
@@ -33,20 +33,20 @@ if [ "$opcion_yaml" == "2" ]; then
   fi
 else
   # Opción 1 o cualquier otra tecla por defecto será descargar
-  echo "Descargando el .yml oficial de Portainer..."
+  echo "2. Descargando el .yml oficial de Portainer..."
   curl -sL https://downloads.portainer.io/ce-lts/portainer-agent-stack.yml -o portainer-agent-stack.yml
 
   # La magia de 'sed': Busca el texto 8000:8000 y lo cambia por 8001:8000 dentro del archivo al vuelo
-  echo "Modificando el mapeo de puertos para evitar problemas con el backend PHP (8000 -> 8001)..."
+  echo "3. Modificando el mapeo de puertos para evitar problemas con el backend PHP (8000 -> 8001)..."
   sed -i 's/8000:8000/8001:8000/g' portainer-agent-stack.yml
 fi
 
 # 5. Desplegar el stack en Swarm
-echo "Mandando la orden de despliegue a Docker Swarm..."
+echo "4. Mandando la orden de despliegue a Docker Swarm..."
 docker stack deploy -c portainer-agent-stack.yml portainer
 
 # 6. Comprobación inteligente (El bucle de espera)
-echo -n "Esperando a que los contenedores arranquen (esto puede tardar si está descargando la imagen)"
+echo -n "5. Esperando a que los contenedores arranquen (esto puede tardar si está descargando la imagen)"
 # Este bucle mira la lista de servicios cada 3 segundos hasta que detecta que portainer está "1/1" (Corriendo)
 while ! docker service ls | grep -E "portainer_portainer.*1/1" > /dev/null; do
     sleep 3
@@ -55,7 +55,7 @@ done
 echo "" # Salto de línea para que quede bonito
 
 # 7. Limpieza
-echo "Limpiando el rastro (borrando el .yml)..."
+echo "6. Limpiando el rastro (borrando el .yml)..."
 rm -f portainer-agent-stack.yml
 
 echo "Portainer desplegado con éxito. Pruebalo en http://192.168.50.1/portainer"

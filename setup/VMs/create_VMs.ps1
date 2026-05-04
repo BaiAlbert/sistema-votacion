@@ -6,13 +6,13 @@ $OS_TYPE = "Ubuntu_64"
 $VBOX = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 
 # Lista de las 4 máquinas que vamos a crear
-$VM_Names = @("Test-App_Manager", "Test-App_DB", "Test-App_Worker1", "Test-App_Worker2")
+$VM_Names = @("App_Manager", "App_DB", "App_Worker1", "App_Worker2")
 
-# PASO 1: Pedir al usuario la ISO de Ubuntu Server 24 LTS
+# PASO 1: Pedir al usuario la ISO de Ubuntu Server 26 LTS
 Write-Host "Abriendo el explorador para seleccionar la ISO de Ubuntu..." -ForegroundColor Cyan
 Add-Type -AssemblyName System.Windows.Forms
 $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog
-$FileBrowser.Title = "Selecciona la ISO de Ubuntu Server 24 LTS (Se usará para todas las VMs)"
+$FileBrowser.Title = "Selecciona la ISO de Ubuntu Server 26 LTS (Se usará para todas las VMs)"
 $FileBrowser.Filter = "Archivos ISO (*.iso)|*.iso|Todos los archivos (*.*)|*.*"
 $FileBrowser.InitialDirectory = [Environment]::GetFolderPath("UserProfile") + "\Downloads"
 
@@ -53,6 +53,7 @@ foreach ($NAME in $VM_Names) {
     # Lector CD/DVD con la ISO ya montada
     & $VBOX storagectl $NAME --name "IDE" --add ide
     & $VBOX storageattach $NAME --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "$ISO_PATH"
+    & $VBOX storageattach $NAME --storagectl "IDE" --port 1 --device 1 --type dvddrive --medium "..\cloud-init\seed_$NAME.iso"
 
     Write-Host "$NAME está lista." -ForegroundColor Green
 }

@@ -57,7 +57,7 @@ Esta opción te guiará para crear y configurar por ti mismo todo el entorno. Se
 Para no tener que crear las máquinas a mano en VirtualBox, dispones de scripts de auto-aprovisionamiento.
 
 - **Requisitos previos:** \* Se recomienda el uso de la versión **7.0.20** de VirtualBox, ya que es la que se usó durante el desarrollo y asegura máxima compatibilidad.
-    - Las máquinas usarán **Ubuntu Server 24.04 LTS**. Puedes descargar la ISO oficial desde [este enlace](https://ubuntu.com/download/server/thank-you?version=24.04.4&architecture=amd64&lts=true).
+    - Las máquinas usarán **Ubuntu Server 26.04 LTS**. Puedes descargar la ISO oficial desde [este enlace](https://ubuntu.com/download/server/thank-you?version=26.04&architecture=amd64&lts=true).
 
 - **Ejecución del Script:**
     1.  Si tu máquina anfitrión es Windows, ejecuta el script de PowerShell: [`create_VMs.ps1`](/setup/VMs/create_VMs.ps1). Si estás en Linux, ejecuta la variante en bash: [`create_VMs.sh`](/setup/VMs/create_VMs.sh).
@@ -65,68 +65,27 @@ Para no tener que crear las máquinas a mano en VirtualBox, dispones de scripts 
     3.  Una vez creadas, el script abrirá el explorador de archivos para que selecciones la ISO de Ubuntu Server que has descargado previamente (en Linux pedirá la ruta por terminal).
     4.  Por último, te preguntará si deseas arrancar todas las máquinas a la vez **(Cuidado: esto supone una gran carga de RAM y CPU para el anfitrión)**, arrancar solo el Manager, o no arrancar ninguna.
 
+
 ### 2. Instalación de los Sistemas Operativos
 
-Una vez creadas las máquinas virtuales, procederemos a instalar el sistema operativo base en cada una de ellas.
+Una vez creadas las máquinas virtuales, procederemos a la instalación del sistema operativo base (Ubuntu Server) de forma totalmente automatizada.
 
-- **Pasos de instalación:**
-    1.  La ISO ya debería estar montada automáticamente en el lector de cada máquina gracias al script. Inicia las máquinas para comenzar la instalación.
+**Pasos de instalación:**
 
-    2.  Durante el asistente de Ubuntu, asegúrate de configurar estos parámetros clave (el resto pueden quedar por defecto):
-        - **Nombre de usuario:** `alberto-ramirez`
-        - **Contraseña:** `1234`
-        - **Particiones:** Asegúrate de que la partición principal está usando todo el espacio disponible.
-        - **Nombre del servidor (Hostname):** `servidor-manager` _(o `servidor-db`, `servidor-worker1`, `servidor-worker2` según corresponda)_.
-        - **OpenSSH Server:** Márcalo para instalarlo (vital para el acceso remoto).
-        - **Ubuntu Server (minimized):** NO lo marques, necesitamos la versión estándar.
+1. **Arranque de las máquinas:** Gracias a los scripts de creación previos, tanto la ISO principal de Ubuntu como la ISO *seed* (configuración desatendida) ya están montadas en las unidades de CD/DVD de cada máquina virtual. Simplemente arranca las cuatro máquinas.
+2. **Instalación desatendida (Zero-Touch):** El proceso comenzará automáticamente al detectar los archivos de Cloud-init. No es necesario realizar ninguna acción por teclado; las máquinas se configurarán y reiniciarán solas al finalizar el proceso.
+3. **Comprobaciones post-instalación:** Aunque el proceso es automático, es altamente recomendable verificar que Cloud-init ha asignado correctamente los parámetros. Inicia sesión en cada máquina y utiliza los comandos `hostname` e `ip a` para contrastar los datos con la siguiente estructura:
 
-    3.  Una vez instalado el sistema y tras el primer reinicio, actualiza los repositorios en todas las máquinas con:
+   | Hostname de Máquina  | IP NAT (enp0s3) | IP Interna (enp0s8) |
+   | :---                 | :---            | :---                |
+   | **servidor-manager** | `10.0.2.50`     | `192.168.1.250`     |
+   | **servidor-db**      | `10.0.2.51`     | `192.168.1.249`     |
+   | **servidor-worker1** | `10.0.2.52`     | `192.168.1.248`     |
+   | **servidor-worker2** | `10.0.2.53`     | `192.168.1.247`     |
 
-        ```bash
-        sudo apt update && sudo apt upgrade -y
-        ```
+4. **Resolución de problemas:** En caso de que algún parámetro de red sea erróneo, puedes modificarlo editando el archivo de configuración con `sudo nano /etc/netplan/50-cloud-init.yaml`. Tras guardar los cambios, aplica la nueva configuración ejecutando el comando `sudo netplan apply`.
 
-    4.  **Configuración de Red Estática:** Para que el clúster funcione, necesitamos fijar las IPs de la red interna. Edita el archivo de red con:
-
-        ```bash
-        sudo nano /etc/netplan/50-cloud-init.yaml
-        ```
-
-        Sustituye el contenido por el siguiente bloque de código (respeta los espacios exactamente).
-        **Importante:** Asegúrate de cambiar las IPs según corresponda la máquina, siguiendo la siguiente tabla.
-
-        | Máquina              | IP enp0s3   | IP enp0s8      |
-        | :------------------- | :---------- | :------------- |
-        | **servidor-manager**  | `10.0.2.50` | `192.168.50.1` |
-        | **servidor-db**      | `10.0.2.51` | `192.168.50.2` |
-        | **servidor-worker1** | `10.0.2.52` | `192.168.50.3` |
-        | **servidor-worker2** | `10.0.2.53` | `192.168.50.4` |
-
-        ```yaml
-        network:
-            version: 2
-            ethernets:
-                enp0s3:
-                    dhcp4: false
-                    addresses: [10.0.2.50/24]
-                    routes:
-                        - to: default
-                          via: 10.0.2.2
-                    nameservers:
-                        addresses: [1.1.1.1, 8.8.8.8]
-                enp0s8:
-                    dhcp4: false
-                    dhcp6: false
-                    addresses: [192.168.50.1/24]
-        ```
-
-    5.  Guarda el archivo (`Ctrl+O`, `Enter`, `Ctrl+X`) y aplica los cambios con:
-
-        ```bash
-        sudo netplan apply
-        ```
-
-Recuerda realizar este proceso en cada una de las 4 máquinas.
+5. **Limpieza de medios (IMPORTANTE):** Tras verificar que la instalación es correcta, apaga las máquinas virtuales de forma ordenada (por ejemplo, con `sudo poweroff`). Antes de volver a encenderlas, asegúrate de **EXPULSAR la ISO *seed*** de las unidades ópticas virtuales. Mantener este archivo insertado es una mala práctica que puede generar retrasos en el arranque o conflictos con el servicio Cloud-init.
 
 ### 3. Preparación del Clúster (Accesos y Docker Swarm)
 
@@ -137,9 +96,9 @@ Genera una clave SSH y cópiala a los otros nodos. Cuando ejecutes `ssh-copy-id`
 
 ```bash
 ssh-keygen -t ed25519 -C "servidor-manager" -f ~/.ssh/id_ed25519 -N ""
-ssh-copy-id alberto-ramirez@192.168.50.2
-ssh-copy-id alberto-ramirez@192.168.50.3
-ssh-copy-id alberto-ramirez@192.168.50.4
+ssh-copy-id alberto-ramirez@192.168.1.249
+ssh-copy-id alberto-ramirez@192.168.1.248
+ssh-copy-id alberto-ramirez@192.168.1.247
 ```
 
 Para simplificar las conexiones, crea un archivo de configuración SSH:
@@ -152,17 +111,17 @@ Pega la siguiente configuración dentro y guárdalo:
 
 ```text
 Host servidor-db
-    HostName 192.168.50.2
+    HostName 192.168.1.249
     User alberto-ramirez
     IdentityFile ~/.ssh/id_ed25519
 
 Host servidor-worker1
-    HostName 192.168.50.3
+    HostName 192.168.1.248
     User alberto-ramirez
     IdentityFile ~/.ssh/id_ed25519
 
 Host servidor-worker2
-    HostName 192.168.50.4
+    HostName 192.168.1.247
     User alberto-ramirez
     IdentityFile ~/.ssh/id_ed25519
 ```

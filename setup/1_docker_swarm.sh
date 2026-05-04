@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 1. Modo de seguridad
+# 1. Modo de seguridad: Detener el script inmediatamente si algún comando falla
 set -e
 
 # 2. Comprobar que se está ejecutando con sudo (root)
@@ -12,8 +12,11 @@ fi
 # El usuario con el que se conecta por SSH a las otras máquinas
 USUARIO="alberto-ramirez" 
 
+# La IP de la máquina principal
+MANAGER_IP="192.168.1.250"
+
 # Lista de IPs de los workers
-WORKERS=("192.168.50.2" "192.168.50.3" "192.168.50.4")
+WORKERS=("192.168.1.249" "192.168.1.248" "192.168.1.247")
 
 echo "1. Instalando Docker en la máquina local (Manager)..."
 curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
@@ -33,7 +36,6 @@ done
 
 echo ""
 echo "3. Creando Docker Swarm..."
-MANAGER_IP="192.168.50.1"
 docker swarm init --advertise-addr $MANAGER_IP
 
 TOKEN=$(docker swarm join-token worker -q)

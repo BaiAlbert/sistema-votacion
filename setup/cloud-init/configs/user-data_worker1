@@ -1,0 +1,70 @@
+#cloud-config
+bootcmd:
+  - cat /proc/cmdline > /tmp/cmdline
+  - sed -i 's/$/ autoinstall/g' /tmp/cmdline
+  - mount -n --bind -o ro /tmp/cmdline /proc/cmdline
+
+autoinstall:
+  # Guia usada: https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html
+  version: 1
+  
+  locale: "es_ES.UTF-8"
+
+  keyboard:
+    layout: es
+
+  source:
+    id: ubuntu-server-minimal
+
+  network:
+    version: 2
+    ethernets:
+      enp0s3:
+        dhcp4: false
+        addresses: 
+          - 10.0.2.52/24
+        routes:
+          - to: default
+            via: 10.0.2.2
+        nameservers:
+          addresses: [8.8.8.8, 1.1.1.1]
+      enp0s8:
+        dhcp4: false
+        dhcp6: false
+        addresses: 
+          - 192.168.1.248/24
+
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+
+  identity:
+    hostname: servidor-worker1
+    username: alberto-ramirez
+    password: "$6$Hz9ppvvdBakndyCe$H8h7C9tIGZRNlHRVj3Ay3ENMq2TTth2vxcF5lLZVV9OEadO5BMyku6BXkPjS.2kKHNT/L6D9GxeE1GZSdGuuo0" # 1234 hasheado con "openssl passwd -6 1234"
+
+  ssh:
+      install-server: true
+      allow-pw: true
+
+  packages:
+    - curl
+    - nano
+    - openssl
+    - git
+
+  timezone: "Europe/Madrid"
+
+  updates: all
+
+  shutdown: reboot
+  
+  late-commands:
+    - "echo 'Instalando Docker...' "
+    - curtin in-target -- curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+    - curtin in-target -- /bin/sh /tmp/get-docker.sh
+    - curtin in-target -- rm /tmp/get-docker.sh
+    - curtin in-target -- systemctl enable docker
+    - "echo 'Reiniciando sistema...' "
+  

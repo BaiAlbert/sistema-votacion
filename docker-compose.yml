@@ -244,7 +244,7 @@ configs:
     esquema_sql:
         file: ./database/1_esquema_db.sql
     mock_data_sql:
-        file: ./database/2_mock_data.sql
+        file: ./database/datos_prueba.sql
 
 volumes:
     db_data_1:
