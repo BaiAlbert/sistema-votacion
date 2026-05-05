@@ -39,6 +39,13 @@ services:
             placement:
                 constraints:
                     - node.labels.role == database
+            resources:
+                reservations:
+                    cpus: '0.50' # Garantiza al menos la mitad de un núcleo
+                    memory: 512M # Garantiza al menos 512 MB de RAM
+                limits:
+                    cpus: '1.40' # Máximo 70% de los núcleos de la maquina
+                    memory: 1536M # Máximo 3 cuartos de la RAM de la máquina
 
     # Nodo 2 de la base de datos
     db-node2:
@@ -67,6 +74,14 @@ services:
             placement:
                 constraints:
                     - node.hostname == servidor-worker1
+            resources:
+                # Menos recursos ya que no son el nodo principal y hay mas servicios aparte en estas máquinas
+                reservations:
+                    cpus: '0.25'
+                    memory: 384M
+                limits:
+                    cpus: '0.80'
+                    memory: 512M
 
     # Nodo 3 de la base de datos
     db-node3:
@@ -95,6 +110,13 @@ services:
             placement:
                 constraints:
                     - node.hostname == servidor-worker2
+            resources:
+                reservations:
+                    cpus: '0.25'
+                    memory: 384M
+                limits:
+                    cpus: '0.80'
+                    memory: 512M
 
     db-proxy:
         image: haproxy:lts
@@ -108,11 +130,47 @@ services:
             placement:
                 constraints:
                     - node.role == manager # Mejor que el proxy esté en el manager para control centralizado
+            restart_policy:
+                condition: any # Reinicia siempre que se caiga
+                delay: 5s # Espera 5 segundos antes de intentar levantarlo
+                max_attempts: 3 # Si falla 3 veces seguidas, desiste (para evitar bucles infinitos)
+                window: 120s # Tiempo que debe estar funcionando para considerar el reinicio "exitoso"
+            resources:
+                # No necesita casi nada ya que es solo para el trafico entre nodos de BD
+                reservations:
+                    cpus: '0.10'
+                    memory: 64M
+                limits:
+                    cpus: '0.40'
+                    memory: 128M
+
+    nginx:
+        image: nginx:stable-alpine
+        ports:
+            - "80:80"
+            # - "443:443"
+        volumes:
+            - ./infra/nginx/sistema-votacion:/etc/nginx/conf.d/default.conf:ro
+        deploy:
+            placement:
+                constraints:
+                    - node.role == manager 
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            resources:
+                # Algo más que HAProxy ya que por aquí pasa todo el trafico de la app
+                reservations:
+                    cpus: '0.10'
+                    memory: 64M
+                limits:
+                    cpus: '0.50'
+                    memory: 256M
 
     backend:
-        image: 192.168.50.1:5000/votacion-backend:latest
-        ports:
-            - '8000:80'
+        image: 192.168.50.1:5000/votacion-backend:latest # php:8.5-apache
         environment:
             DB_HOST: db-proxy
             DB_NAME: db_appvotaciones
@@ -125,15 +183,25 @@ services:
         networks:
             - votacion_net
         deploy:
-            replicas: 2 # 2 instancias del backend
+            replicas: 2
             placement:
                 constraints:
                     - node.labels.role == app
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 5
+                window: 60s
+            resources:
+                reservations:
+                    cpus: '0.20'
+                    memory: 256M
+                limits:
+                    cpus: '0.8'
+                    memory: 512M
 
     frontend:
-        image: 192.168.50.1:5000/votacion-frontend:latest
-        ports:
-            - '3000:3000'
+        image: 192.168.50.1:5000/votacion-frontend:latest # node:24-bookworm-slim
         networks:
             - votacion_net
         deploy:
@@ -141,11 +209,21 @@ services:
             placement:
                 constraints:
                     - node.labels.role == app
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 5
+                window: 30s
+            resources:
+                reservations:
+                    cpus: '0.10'
+                    memory: 128M
+                limits:
+                    cpus: '0.8'
+                    memory: 512M
 
     phpmyadmin:
         image: phpmyadmin:5.2-apache
-        ports:
-            - '8080:80'
         environment:
             PMA_HOST: db-proxy
             PMA_USER: user_appvotaciones
@@ -159,7 +237,19 @@ services:
             placement:
                 constraints:
                     - node.labels.role == app
-
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 5
+                window: 60s
+            resources:
+                reservations:
+                    cpus: '0.10'
+                    memory: 64M
+                limits:
+                    cpus: '0.5'
+                    memory: 256M
+            
     prometheus:
         image: prom/prometheus:latest
         volumes:
@@ -174,14 +264,24 @@ services:
             placement:
                 constraints:
                     - node.role == manager
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            resources:
+                reservations:
+                    cpus: '0.20'
+                    memory: 256M
+                limits:
+                    cpus: '0.80'
+                    memory: 512M
 
     grafana:
         image: grafana/grafana:latest
-        ports:
-            - '3001:3000'
         environment:
-            GF_SERVER_DOMAIN: 192.168.50.1
-            GF_SERVER_ROOT_URL: http://192.168.50.1/grafana/
+            GF_SERVER_DOMAIN: 192.168.1.250
+            GF_SERVER_ROOT_URL: http://192.168.1.250/grafana/
             GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
             # Grafana preguntará si quieres cambiarla tras el primer login
             GF_SECURITY_ADMIN_PASSWORD: admin
@@ -194,6 +294,18 @@ services:
             placement:
                 constraints:
                     - node.role == manager
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 5
+                window: 60s
+            resources:
+                reservations:
+                    cpus: '0.10'
+                    memory: 128M
+                limits:
+                    cpus: '0.50'
+                    memory: 256M
 
     node-exporter:
         image: prom/node-exporter:latest
@@ -209,6 +321,18 @@ services:
             - votacion_net
         deploy:
             mode: global
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 5
+                window: 60s
+            resources:
+                reservations:
+                    cpus: '0.05'
+                    memory: 32M # Garantiza al menos 128 MB de RAM
+                limits:
+                    cpus: '0.10'
+                    memory: 64M
 
     cadvisor:
         image: gcr.io/cadvisor/cadvisor:latest
@@ -221,6 +345,19 @@ services:
             - votacion_net
         deploy:
             mode: global
+            restart_policy:
+                condition: any
+                delay: 5s
+                max_attempts: 5
+                window: 60s
+            resources:
+                reservations:
+                    cpus: '0.10'
+                    memory: 64M
+                limits:
+                    cpus: '0.20'
+                    memory: 128M
+            
 
 secrets:
     db_root_password:

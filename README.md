@@ -57,13 +57,16 @@ Esta opción te guiará para crear y configurar por ti mismo todo el entorno. Se
 Para no tener que crear las máquinas a mano en VirtualBox, dispones de scripts de auto-aprovisionamiento.
 
 - **Requisitos previos:** \* Se recomienda el uso de la versión **7.0.20** de VirtualBox, ya que es la que se usó durante el desarrollo y asegura máxima compatibilidad.
-    - Las máquinas usarán **Ubuntu Server 26.04 LTS**. Puedes descargar la ISO oficial desde [este enlace](https://ubuntu.com/download/server/thank-you?version=26.04&architecture=amd64&lts=true).
+    - Las máquinas usarán **Ubuntu Server 24.04.4 LTS**. Puedes descargar la ISO oficial desde [este enlace](https://ubuntu.com/download/server/thank-you?version=24.04.4&architecture=amd64&lts=true).
+    - Asegúrate de descargar este repositorio en tu máquina anfitrión para poder usar correctamente los scripts que crearán las máquinas virtuales.
 
 - **Ejecución del Script:**
     1.  Si tu máquina anfitrión es Windows, ejecuta el script de PowerShell: [`create_VMs.ps1`](/setup/VMs/create_VMs.ps1). Si estás en Linux, ejecuta la variante en bash: [`create_VMs.sh`](/setup/VMs/create_VMs.sh).
     2.  El script creará las 4 máquinas virtuales con las siguientes especificaciones: `2GB RAM`, `2 vCPUs`, `32MB VRAM`, `1 Disco VDI de 20GB`, `1 Lector CD/DVD` y `2 adaptadores de red` (NAT para internet y Red Interna "Red_Swarm" para el clúster).
     3.  Una vez creadas, el script abrirá el explorador de archivos para que selecciones la ISO de Ubuntu Server que has descargado previamente (en Linux pedirá la ruta por terminal).
-    4.  Por último, te preguntará si deseas arrancar todas las máquinas a la vez **(Cuidado: esto supone una gran carga de RAM y CPU para el anfitrión)**, arrancar solo el Manager, o no arrancar ninguna.
+    4. Por último, el script te preguntará qué máquinas deseas iniciar. **⚠️ Advertencia de rendimiento:** Ejecutar cuatro instalaciones desatendidas simultáneamente genera un pico masivo de operaciones de lectura/escritura (Altas IOPS) en el disco del anfitrión, además de una alta carga de CPU y RAM.
+        * **Si tienes un disco SSD NVMe:** Puedes usar la opción de arrancar todas a la vez sin problemas de rendimiento, el delay de 3 minutos que deja el script es suficiente para evitar problemas.
+        * **Si tienes un disco SSD SATA o HDD (Recomendado):** Para evitar cuellos de botella de E/S que puedan hacer fallar el instalador, arranca las máquinas de forma escalonada una por una.
 
 
 ### 2. Instalación de los Sistemas Operativos
@@ -188,11 +191,11 @@ _(Fíjate en la columna `REPLICAS`. Si un servicio dice `2/2` o `1/1`, significa
 **3. Pruebas de acceso web (Desde tu navegador en Windows 10):**
 Abre tu navegador web y comprueba los siguientes accesos:
 
-- **Página web principal:** `http://192.168.50.1`
-- **Panel de Portainer:** `http://192.168.50.1/portainer` (Crea tu usuario y contraseña de administrador la primera vez que entres).
-- **Panel de phpMyAdmin:** `http://192.168.50.1/phpmyadmin`
-- **Panel de Grafana:** `http://192.168.50.1/grafana/` (User: admin, Pass: Admin)
-- **Panel de HAProxy:** `http://192.168.50.1:8404/stats`
+- **Página web principal:** `http://192.168.1.250`
+- **Panel de Portainer:** `http://192.168.1.250/portainer` (Crea tu usuario y contraseña de administrador la primera vez que entres).
+- **Panel de phpMyAdmin:** `http://192.168.1.250/phpmyadmin`
+- **Panel de Grafana:** `http://192.168.1.250/grafana/` (User: admin, Pass: admin)
+- **Panel de HAProxy:** `http://192.168.1.250:8404/stats`
 
 ---
 

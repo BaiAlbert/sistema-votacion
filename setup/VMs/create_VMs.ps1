@@ -8,11 +8,14 @@ $VBOX = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 # Lista de las 4 máquinas que vamos a crear
 $VM_Names = @("App_Manager", "App_DB", "App_Worker1", "App_Worker2")
 
-# PASO 1: Pedir al usuario la ISO de Ubuntu Server 26 LTS
+$BASE_PATH = Split-Path -Parent $PSScriptRoot  # Esto nos sube a (.../setup)
+$CLOUD_INIT_DIR = Join-Path $BASE_PATH "cloud-init" # Ruta a (.../setup/cloud-init)
+
+# PASO 1: Pedir al usuario la ISO de Ubuntu Server 24.04 LTS
 Write-Host "Abriendo el explorador para seleccionar la ISO de Ubuntu..." -ForegroundColor Cyan
 Add-Type -AssemblyName System.Windows.Forms
 $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog
-$FileBrowser.Title = "Selecciona la ISO de Ubuntu Server 26 LTS (Se usará para todas las VMs)"
+$FileBrowser.Title = "Selecciona la ISO de Ubuntu Server 24.04 LTS (Se usará para todas las VMs)"
 $FileBrowser.Filter = "Archivos ISO (*.iso)|*.iso|Todos los archivos (*.*)|*.*"
 $FileBrowser.InitialDirectory = [Environment]::GetFolderPath("UserProfile") + "\Downloads"
 
@@ -53,7 +56,8 @@ foreach ($NAME in $VM_Names) {
     # Lector CD/DVD con la ISO ya montada
     & $VBOX storagectl $NAME --name "IDE" --add ide
     & $VBOX storageattach $NAME --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "$ISO_PATH"
-    & $VBOX storageattach $NAME --storagectl "IDE" --port 1 --device 1 --type dvddrive --medium "..\cloud-init\seed_$NAME.iso"
+    $SEED_ISO_PATH = Join-Path $CLOUD_INIT_DIR "seed_$NAME.iso"
+    & $VBOX storageattach $NAME --storagectl "IDE" --port 1 --device 1 --type dvddrive --medium "$SEED_ISO_PATH"
 
     Write-Host "$NAME está lista." -ForegroundColor Green
 }
@@ -78,7 +82,8 @@ switch ($opcion) {
         foreach ($NAME in $VM_Names) {
             Write-Host "Iniciando $NAME..." -ForegroundColor Green
             & $VBOX startvm $NAME --type gui
-            Start-Sleep -Seconds 5 # Pausa de 5 segundos para no agobiar la CPU del host
+            Write-Host "Esperando 3 minutos para no saturar la máquina host..."
+            Start-Sleep -Seconds 180
         }
     }
     default {

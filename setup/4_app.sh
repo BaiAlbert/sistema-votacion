@@ -12,7 +12,7 @@ fi
 # Variables que puedan necesitar cambios en un futuro
 REPO_URL="https://github.com/BaiAlbert/sistema-votacion.git"
 APP_DIR="/opt/sistema-votacion" # /opt es la carpeta estándar para apps en Linux
-REGISTRY="192.168.50.1:5000"
+MANAGER_IP="192.168.1.250"
 
 echo "Iniciando el despliegue maestro del Sistema de Votación..."
 
@@ -30,6 +30,7 @@ else
     cd "$APP_DIR"
 fi
 
+<<comentario
 # 4. Instalación y configuración de Nginx
 echo "Comprobando e instalando Nginx..."
 
@@ -57,6 +58,7 @@ ln -sf /etc/nginx/sites-available/sistema-votacion /etc/nginx/sites-enabled/sist
 # Comprobamos y recargamos (reload es mejor que restart para no tirar a otros usuarios)
 nginx -t
 systemctl reload nginx
+comentario
 
 # 5. Creación de Secretos (Idempotente: solo los crea si no existen)
 echo "Verificando secrets de Docker..."
@@ -97,6 +99,8 @@ fi
 # docker push $REGISTRY/votacion-db-galera:latest
 
 docker builder prune -a -f
+
+REGISTRY="$MANAGER_IP:5000"
 
 echo "Compilando y subiendo el Backend..."
 docker build -t $REGISTRY/votacion-backend:latest ./backend
