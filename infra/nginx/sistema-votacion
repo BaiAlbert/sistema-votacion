@@ -169,4 +169,22 @@ server {
         add_header Cache-Control "no-cache, no-store, must-revalidate" always;
         add_header Pragma "no-cache" always;
     }
+
+    location /haproxy/ {
+        proxy_pass http://db-proxy:8404/;
+
+        # Headers de proxy básicos
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+
+        add_header Pragma "no-cache" always;
+
+        add_header ETag "" always;
+
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "DENY" always; # API no debe ser embebida
+    }
 }
