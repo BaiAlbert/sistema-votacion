@@ -1,6 +1,8 @@
 /backend/vendor/
 /backend/.env
 
+/database/datos_prueba*
+
 # Logs
 logs
 *.log

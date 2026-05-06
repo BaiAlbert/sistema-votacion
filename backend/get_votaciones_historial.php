@@ -77,7 +77,7 @@ try {
     $stmtAuditPending = $conexion->query("SELECT id FROM votaciones WHERE (cerrada = 1 OR NOW() > fecha_final) AND estado_auditoria = 'pendiente'");
     $pendingToAudit = $stmtAuditPending->fetchAll(PDO::FETCH_COLUMN);
     foreach ($pendingToAudit as $vidToAudit) {
-        IntegridadService::auditar($vidToAudit, $conexion, $jwt_secret);
+        IntegridadService::auditar($vidToAudit, $conexion, $blockchain_secret);
     }
 
     // Construimos dinámicamente el fragmento IN() para SQL, o dejarlo en fallback irrealizable si está vacío

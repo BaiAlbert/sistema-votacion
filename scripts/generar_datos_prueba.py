@@ -54,8 +54,8 @@ def main():
     print("Iniciando la generación de datos...")
 
     # Archivos de salida
-    sql_file = open('.\database\datos_prueba.sql', 'w', encoding='utf-8')
-    csv_file = open('.\database\datos_prueba_credenciales.csv', 'w', encoding='utf-8', newline='')
+    sql_file = open('..\\database\\datos_prueba.sql', 'w', encoding='utf-8')
+    csv_file = open('..\\database\\datos_prueba_credenciales.csv', 'w', encoding='utf-8', newline='')
     
     csv_writer = csv.writer(csv_file)
     # Cabecera del CSV

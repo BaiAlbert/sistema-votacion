@@ -104,7 +104,7 @@ try {
 
     // 4 Auditar la votación en el momento que la cerramos
     require_once 'service_integridad.php';
-    IntegridadService::auditar($id_votacion, $conexion, $jwt_secret);
+    IntegridadService::auditar($id_votacion, $conexion, $blockchain_secret);
 
     // 5. Calcular el ganador (opcional pero recomendable al cerrar)
     // Contar los votos por opción
