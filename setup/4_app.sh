@@ -13,6 +13,7 @@ fi
 REPO_URL="https://github.com/BaiAlbert/sistema-votacion.git"
 APP_DIR="/opt/sistema-votacion" # /opt es la carpeta estándar para apps en Linux
 MANAGER_IP="192.168.1.250"
+REGISTRY="$MANAGER_IP:5000"
 
 echo "Iniciando el despliegue maestro del Sistema de Votación..."
 
@@ -24,43 +25,16 @@ if [ -d "$APP_DIR/.git" ]; then
     git fetch --all
     git reset --hard origin/main
     chmod +x setup/*.sh
+    chmod +x scripts/*.sh
 else
     echo "Clonando el repositorio en $APP_DIR..."
     git clone "$REPO_URL" "$APP_DIR"
     cd "$APP_DIR"
+    chmod +x setup/*.sh
+    chmod +x scripts/*.sh
 fi
 
-<<comentario
-# 4. Instalación y configuración de Nginx
-echo "Comprobando e instalando Nginx..."
-
-# Actualizamos la lista de paquetes
-# Usamos -qq para que sea silencioso y no llene la pantalla de texto basura
-apt-get update -qq
-
-# Instalamos Nginx. La bandera -y es CRUCIAL para que no pregunte "Do you want to continue? [Y/n]"
-apt-get install -y nginx
-
-# Borramos la configuración por defecto de Nginx que viene de fábrica
-# Esto evita el clásico error de "el puerto 80 ya está en uso"
-rm -f /etc/nginx/sites-enabled/default
-rm -f /etc/nginx/sites-available/default
-
-# Nos aseguramos de que el servicio esté activado para que arranque si la máquina se reinicia
-systemctl enable nginx
-systemctl start nginx
-
-echo "Configurando Nginx..."
-# Copiamos usando rutas relativas (como ya hemos hecho 'cd', el archivo está justo aquí)
-cp -f infra/nginx/sistema-votacion /etc/nginx/sites-available/sistema-votacion
-# Creamos el acceso directo en sites-enabled para que Nginx lo lea
-ln -sf /etc/nginx/sites-available/sistema-votacion /etc/nginx/sites-enabled/sistema-votacion
-# Comprobamos y recargamos (reload es mejor que restart para no tirar a otros usuarios)
-nginx -t
-systemctl reload nginx
-comentario
-
-# 5. Creación de Secretos (Idempotente: solo los crea si no existen)
+# 4. Creación de Secretos (Idempotente: solo los crea si no existen)
 echo "Verificando secrets de Docker..."
 
 if ! docker secret ls | grep -qw "db_root_password"; then
@@ -93,15 +67,42 @@ if ! docker secret ls | grep -qw "blockchain_secret"; then
     openssl rand -hex 32 | docker secret create blockchain_secret -
 fi
 
+# 5. Generación de datos de prueba si los ficheros no existen
+if [ ! -f "$APP_DIR/database/datos_prueba.sql" ]; then
+    echo "Generando datos de prueba inyectando los secretos de forma segura..."
+    
+    # Lanzamos un servicio efímero que tiene acceso nativo a los secrets del clúster
+    docker service create \
+        --name temp_data_generator \
+        --restart-condition none \
+        --mount type=bind,source="$APP_DIR",target=/app \
+        --workdir /app \
+        --secret dni_pepper \
+        --secret blockchain_secret \
+        python:3-slim bash -c "pip install --no-cache-dir Faker bcrypt && python scripts/generar_datos_prueba.py"
+
+    echo "Esperando a que termine la generación de datos..."
+    # Comprobamos el estado del servicio hasta que termine o falle
+    while true; do
+        STATE=$(docker service ps temp_data_generator --format '{{.CurrentState}}' | head -n 1 2>/dev/null || echo "Starting")
+        if [[ "$STATE" == Complete* ]]; then
+            echo "Generación de datos completada con éxito."
+            break
+        elif [[ "$STATE" == Failed* ]]; then
+            echo "Error en la generación de datos."
+            docker service logs temp_data_generator
+            break
+        fi
+        sleep 2
+    done
+
+    echo "Borrando el contenedor temporal..."
+    docker service rm temp_data_generator
+else
+    echo "El archivo datos_prueba.sql ya existe. Omitiendo la generación de datos."
+fi
+
 # 6. Compilación y subida de imágenes
-# echo "Compilando y subiendo la Base de Datos..."
-# docker build -t $REGISTRY/votacion-db-galera:latest ./database
-# docker push $REGISTRY/votacion-db-galera:latest
-
-docker builder prune -a -f
-
-REGISTRY="$MANAGER_IP:5000"
-
 echo "Compilando y subiendo el Backend..."
 docker build -t $REGISTRY/votacion-backend:latest ./backend
 docker push $REGISTRY/votacion-backend:latest

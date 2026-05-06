@@ -15,9 +15,19 @@ from faker import Faker
 # Inicializar Faker con localización de España
 fake = Faker('es_ES')
 
+import os
+
+def get_secret(secret_name, default_value):
+    """Intenta leer un secreto de Docker Swarm, si no existe usa el valor por defecto."""
+    path = f"/run/secrets/{secret_name}"
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    return default_value
+
 # Constantes de Seguridad y Configuración
-DNI_PEPPER = "6b8821901f9587a0d33aa0dec880d2a78ccf3f9adca2523b228135d0c71ac4c5"
-BLOCKCHAIN_SECRET = "83299ee1bd7515afe3503044ceb2378952210d1d6ef4d2ac600a618ad61bb340"
+DNI_PEPPER = get_secret("dni_pepper", "6b8821901f9587a0d33aa0dec880d2a78ccf3f9adca2523b228135d0c71ac4c5")
+BLOCKCHAIN_SECRET = get_secret("blockchain_secret", "83299ee1bd7515afe3503044ceb2378952210d1d6ef4d2ac600a618ad61bb340")
 PASSWORD_PLAIN = "123456"
 
 # Optimización: Como todos los usuarios tendrán la misma contraseña plana,
@@ -53,9 +63,18 @@ def escape_sql(text):
 def main():
     print("Iniciando la generación de datos...")
 
+    # Rutas absolutas para que funcione bien dentro del contenedor Linux
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = os.path.dirname(script_dir)
+    db_dir = os.path.join(root_dir, 'database')
+    os.makedirs(db_dir, exist_ok=True)
+
+    sql_path = os.path.join(db_dir, 'datos_prueba.sql')
+    csv_path = os.path.join(db_dir, 'datos_prueba_credenciales.csv')
+
     # Archivos de salida
-    sql_file = open('..\\database\\datos_prueba.sql', 'w', encoding='utf-8')
-    csv_file = open('..\\database\\datos_prueba_credenciales.csv', 'w', encoding='utf-8', newline='')
+    sql_file = open(sql_path, 'w', encoding='utf-8')
+    csv_file = open(csv_path, 'w', encoding='utf-8', newline='')
     
     csv_writer = csv.writer(csv_file)
     # Cabecera del CSV
