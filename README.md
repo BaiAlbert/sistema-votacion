@@ -160,6 +160,8 @@ Con el clúster Swarm operativo, solo queda ejecutar los scripts restantes en or
     ```bash
     sudo ./setup/3_portainer.sh
     ```
+    *  Asegúrate de ir a 192.168.1.250:9000 para poder crear la contraseña del usuario Admin, si no lo haces en 5 minutos desde la ejecución del script Portainer se bloqueará y habrá que reiniciarlo de una manera algo complicada.
+
 3. **Despliegue de la Aplicación Principal:** (Base de datos, Backend, Frontend y Proxy Nginx)
     ```bash
     sudo ./setup/4_app.sh
@@ -194,7 +196,7 @@ Abre tu navegador web y comprueba los siguientes accesos:
 - **Página web principal:** `http://192.168.1.250`
 - **Panel de Portainer:** `http://192.168.1.250/portainer` (Crea tu usuario y contraseña de administrador la primera vez que entres).
 - **Panel de phpMyAdmin:** `http://192.168.1.250/phpmyadmin`
-- **Panel de Grafana:** `http://192.168.1.250/grafana/` (User: admin, Pass: admin)
+- **Panel de Grafana:** `http://192.168.1.250/grafana` (User: admin, Pass: admin)
 - **Panel de HAProxy:** `http://192.168.1.250:8404/stats`
 
 ---

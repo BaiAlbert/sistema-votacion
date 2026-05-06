@@ -24,9 +24,12 @@ fi
 
 echo "Comprobando sintaxis del archivo de configuración..."
 if docker exec "$CONTAINER_ID" nginx -t; then
-    echo "Sintaxis correcta. Recargando Nginx..."
-    docker exec "$CONTAINER_ID" nginx -s reload
-    echo "¡Configuración actualizada con éxito!"
+    echo "Sintaxis correcta. Reiniciando el contenedor para enlazar los nuevos cambios..."
+    
+    # Aquí aplicamos el "Restart" en lugar del "Reload" para solucionar el problema del inodo
+    docker restart "$CONTAINER_ID"
+    
+    echo "Actualización completada y aplicada con éxito."
 else
     echo "Error de sintaxis. No se ha recargado."
     exit 1
