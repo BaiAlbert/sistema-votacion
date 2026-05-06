@@ -75,6 +75,7 @@ if [ ! -f "$APP_DIR/database/datos_prueba.sql" ]; then
     docker service create \
         --name temp_data_generator \
         --restart-condition none \
+        --constraint node.role==manager \
         --mount type=bind,source="$APP_DIR",target=/app \
         --workdir /app \
         --secret dni_pepper \
