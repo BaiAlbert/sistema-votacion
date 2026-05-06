@@ -3,6 +3,9 @@ server {
     listen 80;
     server_name _; # Captura cualquier IP o dominio
 
+    # Le decimos a Nginx que use el servidor DNS interno de Docker
+    resolver 127.0.0.11 valid=30s;
+
     # HEADERS DE SEGURIDAD GLOBALES
     # Estos headers se aplican a todas las respuestas del servidor
 
@@ -47,7 +50,9 @@ server {
 
     # 1. Enrutar el Frontend (React)
     location / {
-        proxy_pass http://frontend:3000;
+        # Al meterlo en una variable, Nginx no colapsa si el frontend tarda en arrancar
+        set $upstream_frontend http://frontend:3000;
+        proxy_pass $upstream_frontend;
 
         # Headers de proxy básicos - identifican la conexión original
         proxy_set_header Host $host; # Envía el Host original al backend
@@ -74,8 +79,10 @@ server {
     # 2. Enrutar el Backend (API PHP)
     # La barra al final de 80/ es importante. Hace que Nginx elimine el "/api/"
     # antes de pasárselo al contenedor de PHP.
-    location /api/ {
-        proxy_pass http://backend:80/;
+    location ~ ^/api/(.*)$ {
+        # Para el backend con variables y quitando el /api/, esta es la sintaxis correcta:
+        set $upstream_backend http://backend:80;
+        proxy_pass $upstream_backend/$1$is_args$args;
 
         # Headers de proxy básicos
         proxy_set_header Host $host;
@@ -105,8 +112,9 @@ server {
 
     # 3. Enrutar phpMyAdmin
     # Panel de administración para gestión visual de MySQL
-    location /phpmyadmin/ {
-        proxy_pass http://phpmyadmin:80/;
+    location ~ ^/phpmyadmin/(.*)$ {
+        set $upstream_pma http://phpmyadmin:80;
+        proxy_pass $upstream_pma/$1$is_args$args;
 
         # Headers de proxy básicos
         proxy_set_header Host $host;
@@ -145,8 +153,9 @@ server {
     }
 
     # 5. Enrutar Grafana
-    location /grafana/ {
-        proxy_pass http://grafana:3000;
+    location ~ ^/grafana/(.*)$ {
+        set $upstream_grafana http://grafana:3000;
+        proxy_pass $upstream_grafana/$1$is_args$args;
 
         # Headers de proxy básicos
         proxy_set_header Host $host;
@@ -170,8 +179,9 @@ server {
         add_header Pragma "no-cache" always;
     }
 
-    location /haproxy/ {
-        proxy_pass http://db-proxy:8404/;
+    location ~ ^/haproxy/(.*)$ {
+        set $upstream_haproxy http://db-proxy:8404;
+        proxy_pass $upstream_haproxy/$1$is_args$args;
 
         # Headers de proxy básicos
         proxy_set_header Host $host;

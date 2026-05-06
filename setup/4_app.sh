@@ -72,7 +72,8 @@ if [ ! -f "$APP_DIR/database/datos_prueba.sql" ]; then
     echo "Generando datos de prueba inyectando los secretos de forma segura..."
     
     # Lanzamos un servicio efímero que tiene acceso nativo a los secrets del clúster
-    docker service create \
+    # Usamos -d (detach) para que Swarm no bloquee esperando a que el servicio sea "permanente"
+    docker service create -d \
         --name temp_data_generator \
         --restart-condition none \
         --constraint node.role==manager \
