@@ -11,26 +11,23 @@ fi
 
 echo "Iniciando actualización de Nginx..."
 
-ARCHIVO_ORIGEN="./infra/nginx/sistema-votacion"
-RUTA_DESTINO="/etc/nginx/sites-available/sistema-votacion"
+# Cambia "votacion_nginx" por el nombre exacto de tu servicio si es distinto
+NOMBRE_SERVICIO="app_votaciones_nginx"
 
-if [ ! -f "$ARCHIVO_ORIGEN" ]; then
-    echo "Error: No se encuentra el archivo en $ARCHIVO_ORIGEN"
-    echo "Asegúrate de ejecutar el script desde la raíz del proyecto (sistema-votacion/)."
+echo "Buscando contenedor de Nginx..."
+CONTAINER_ID=$(docker ps -q -f name=$NOMBRE_SERVICIO)
+
+if [ -z "$CONTAINER_ID" ]; then
+    echo "Error: No se encontró Nginx en ejecución."
     exit 1
 fi
 
-echo "Copiando la nueva configuración..."
-cp "$ARCHIVO_ORIGEN" "$RUTA_DESTINO"
-
-echo "Comprobando si la sintaxis del archivo es correcta..."
-
-if nginx -t; then
-    echo "Nueva configuración correcta. Recargando Nginx..."
-    systemctl reload nginx
-    echo "Actualización completada."
+echo "Comprobando sintaxis del archivo de configuración..."
+if docker exec "$CONTAINER_ID" nginx -t; then
+    echo "Sintaxis correcta. Recargando Nginx..."
+    docker exec "$CONTAINER_ID" nginx -s reload
+    echo "¡Configuración actualizada con éxito!"
 else
-    echo "Nginx ha detectado un error en el archivo de configuración."
-    echo "Revisa el archivo, no se ha recargado el servicio."
+    echo "Error de sintaxis. No se ha recargado."
     exit 1
 fi

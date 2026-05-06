@@ -48,6 +48,12 @@ server {
     # del sitio sin autorización explícita
     add_header X-Permitted-Cross-Domain-Policies "none" always;
 
+    # Redirecciones por si el usuario no pone la / final
+    location = /phpmyadmin { return 301 $scheme://$http_host/phpmyadmin/; }
+    location = /grafana    { return 301 $scheme://$http_host/grafana/; }
+    location = /haproxy    { return 301 $scheme://$http_host/haproxy/; }
+
+
     # 1. Enrutar el Frontend (React)
     location / {
         # Al meterlo en una variable, Nginx no colapsa si el frontend tarda en arrancar
